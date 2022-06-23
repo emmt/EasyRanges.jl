@@ -14,9 +14,9 @@ an *index range* which may be an `Int`-valued step range or an instance of
 by `for` loops.   For instance, assume that you want to do compute a **discrete
 correlation** of `A` by `B` as follows:
 
-$
+$$
 C[i] = \sum_{j} A[j]\,B[j-i]
-$
+$$
 
 and for all valid indices `i` and `j`.  Assuming `A`, `B` and `C` are abstract
 vectors, the Julia equivalent code is:
@@ -91,9 +91,9 @@ end
 
 Now suppose that you want to compute the **discrete convolution** instead:
 
-$
+$$
 C[i] = \sum_{j} A[j]\,B[i-j]
-$
+$$
 
 Then, the code for multi-dimensional arrays writes:
 
