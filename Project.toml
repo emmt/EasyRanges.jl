@@ -1,0 +1,13 @@
+name = "IndexingTools"
+uuid = "83f21cc0-8014-4203-be99-7f9a344a7887"
+authors = ["Éric Thiébaut <eric.thiebaut@univ-lyon1.fr> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
