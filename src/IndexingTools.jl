@@ -54,9 +54,9 @@ function rewrite!(ex::Expr)
         elseif ex.args[1] === :(∩)
             ex.args[1] = :(IndexingTools.cap)
         elseif ex.args[1] === :(±)
-            ex.args[1] = :(IndexingTools.pm)
+            ex.args[1] = :(IndexingTools.stretch)
         elseif ex.args[1] === :(∓)
-            ex.args[1] = :(IndexingTools.mp)
+            ex.args[1] = :(IndexingTools.shrink)
         end
         for i in 2:length(ex.args)
             rewrite!(ex.args[i])
@@ -236,23 +236,23 @@ cap(a::CartesianIndices{N}, b::CartesianIndices{N}) where {N} =
     CartesianIndices(map(cap, ranges(a), ranges(b)))
 
 """
-    IndexingTools.pm(a, b)
+    IndexingTools.stretch(a, b)
 
 yields the result of expression `a ± b` in [`@range`](@ref) macro.
 
 """
-pm(a::Int, b::Int) = (a - b):(a + b)
+stretch(a::Int, b::Int) = (a - b):(a + b)
 
 """
-    IndexingTools.mp(a, b)
+    IndexingTools.shrink(a, b)
 
 yields the result of expression `a ∓ b` in [`@range`](@ref) macro.
 
 """
-mp(a::Int, b::Int) = (a + b):(a - b)
+shrink(a::Int, b::Int) = (a + b):(a - b)
 
-for (f, s) in ((:pm, :StretchBy),
-               (:mp, :ShrinkBy))
+for (f, s) in ((:stretch, :StretchBy),
+               (:shrink, :ShrinkBy))
     @eval begin
         struct $s <: Function
             δ::Int # left operand

@@ -4,7 +4,7 @@ using Test
 
 using Base: OneTo
 using IndexingTools
-using IndexingTools: forward, ranges, to_type, to_int, pm, mp
+using IndexingTools: forward, backward, ranges, to_type, to_int, stretch, shrink
 
 @testset "IndexingTools.jl" begin
     # Check normalization of ranges.
@@ -18,20 +18,20 @@ using IndexingTools: forward, ranges, to_type, to_int, pm, mp
     @test forward(Int16(11):Int16(-3):Int16(-2)) === -1:3:11
 
     # Streching.
-    @test pm(7, 11) === -4:18
-    @test pm(Int16(7), Int16(11)) === -4:18
-    @test pm(OneTo(6), 3) === -2:9
-    @test pm(OneTo{Int16}(6), Int16(3)) === -2:9
-    @test pm(7, 3) === 4:10
-    @test pm(7, Int16(3)) === 4:10
+    @test stretch(7, 11) === -4:18
+    @test stretch(Int16(7), Int16(11)) === -4:18
+    @test stretch(OneTo(6), 3) === -2:9
+    @test stretch(OneTo{Int16}(6), Int16(3)) === -2:9
+    @test stretch(7, 3) === 4:10
+    @test stretch(7, Int16(3)) === 4:10
 
     # Shrinking.
-    @test mp(7, -11) === -4:18
-    @test mp(Int16(7), -Int16(11)) === -4:18
-    @test mp(OneTo(6), -2) === 3:4
-    @test mp(OneTo{Int16}(6), -Int16(2)) === 3:4
-    @test mp(7, -3) === 4:10
-    @test mp(7, -Int16(3)) === 4:10
+    @test shrink(7, -11) === -4:18
+    @test shrink(Int16(7), -Int16(11)) === -4:18
+    @test shrink(OneTo(6), -2) === 3:4
+    @test shrink(OneTo{Int16}(6), -Int16(2)) === 3:4
+    @test shrink(7, -3) === 4:10
+    @test shrink(7, -Int16(3)) === 4:10
 
     # Shift CartesianIndices by CartesianIndex.
     @test (@range CartesianIndices((2:3, -1:5)) + CartesianIndex(4,-7)) ===
