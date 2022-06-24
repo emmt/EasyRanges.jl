@@ -1,6 +1,8 @@
 module IndexingTools
 
-export @range
+export
+    @range,
+    @reverse_range
 
 using Base: OneTo
 
@@ -39,8 +41,28 @@ yields a callable object `obj` such that `obj(x)` yields `x` shrinked by offset
 
 """ ShrinkBy
 
+"""
+    @range expr
+
+rewrites range expression `expr` with extended syntax.  The result is an
+`Int`-valued index range (possibly Cartesian) where indices are running in the
+forward direction (with a positive step).
+
+"""
 macro range(ex::Expr)
     esc(Expr(:call, :(IndexingTools.forward), rewrite!(ex)))
+end
+
+"""
+    @reverse_range expr
+
+rewrites range expression `expr` with extended syntax.  The result is an
+`Int`-valued index range (possibly Cartesian) where indices are running in the
+reverse direction (with a negative step).
+
+"""
+macro reverse_range(ex::Expr)
+    esc(Expr(:call, :(IndexingTools.backward), rewrite!(ex)))
 end
 
 rewrite!(x) = x # left anything else untouched
@@ -90,7 +112,7 @@ but with negative step(s) and `Int`-valued.
 """
 function backward(a::AbstractUnitRange{<:Integer})
     first_a, last_a = first_last(a)
-    return last_a:first_a
+    return last_a:-1:first_a
 end
 function backward(a::OrdinalRange{<:Integer,<:Integer})
     first_a, step_a, last_a = first_step_last(a)
@@ -238,7 +260,8 @@ cap(a::CartesianIndices{N}, b::CartesianIndices{N}) where {N} =
 """
     IndexingTools.stretch(a, b)
 
-yields the result of expression `a ± b` in [`@range`](@ref) macro.
+yields the result of stretching `a` by amount `b`.  This is equivalent to the
+expression `a ± b` in [`@range`](@ref) macro.
 
 """
 stretch(a::Int, b::Int) = (a - b):(a + b)
@@ -246,7 +269,8 @@ stretch(a::Int, b::Int) = (a - b):(a + b)
 """
     IndexingTools.shrink(a, b)
 
-yields the result of expression `a ∓ b` in [`@range`](@ref) macro.
+yields the result of shrinking `a` by amount `b`.  This is equivalent to the
+expression `a ∓ b` in [`@range`](@ref) macro.
 
 """
 shrink(a::Int, b::Int) = (a + b):(a - b)

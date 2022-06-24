@@ -4,18 +4,21 @@
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/emmt/IndexingTools.jl?svg=true)](https://ci.appveyor.com/project/emmt/IndexingTools-jl)
 [![Coverage](https://codecov.io/gh/emmt/IndexingTools.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/emmt/IndexingTools.jl)
 
-`IndexingTools` is a small Julia package dedicated at making lfe easier with
-(Cartesian) indices and ranges.  This package exports a macro `@range` which
-takes a single expression and rewrites it with extended syntax rules to produce
-an *index range* which may be an `Int`-valued step range or an instance of
-`CartesianIndices`.
+`IndexingTools` is a small Julia package dedicated at making life easier with,
+possibly Cartesian, indices and ranges.  This package exports macros `@range`
+and `@reverse_range` which take a single expression and rewrites it with
+extended syntax rules to produce an `Int`-valued *index range* which may be a
+step range or an instance of `CartesianIndices`.  These two macros differ in
+the step sign of the result.
+
+## A working example
 
 `IndexingTools` may be very useful to write readable expressions in ranges used
-by `for` loops.   For instance, assume that you want to do compute a **discrete
+by `for` loops.  For instance, suppose that you want to compute a **discrete
 correlation** of `A` by `B` as follows:
 
 $$
-C[i] = \sum_{j} A[j]\,B[j-i]
+C[i] = \sum_{j} A[j] B[j-i]
 $$
 
 and for all valid indices `i` and `j`.  Assuming `A`, `B` and `C` are abstract
@@ -34,8 +37,8 @@ end
 ```
 
 where `T` is a suitable type, say `T = promote_type(eltype(A), eltype(B))`.
-The expressions of `j_first` and `j_last` are to make sure that `A[j]` and
-`B[j-i]` are in bounds.  The same code but for multidimensional arrays is:
+The above expressions of `j_first` and `j_last` are to make sure that `A[j]`
+and `B[j-i]` are in bounds.  The same code for multidimensional arrays writes:
 
 ```julia
 for i ∈ CartesianIndices(C)
@@ -52,11 +55,11 @@ end
 ```
 
 now `i` and `j` are multidimensional Cartesian indices and Julia already helps
-a lot by making the above code applicable whatever the number of dimensions.
-Note that the syntax `j_first:j_last` is supported for Cartesian indices since
-Julia 1.1.  There is more such syntactic sugar and using the broadcasting
-operator `.+` and the operator `∩` (a shortcut for the function `intersect`),
-the code can be rewritten as:
+a lot by making such a code applicable whatever the number of dimensions.  Note
+that the syntax `j_first:j_last` is supported for Cartesian indices since Julia
+1.1.  There is more such syntactic sugar and using the broadcasting operator
+`.+` and the operator `∩` (a shortcut for the function `intersect`), the code
+can be rewritten as:
 
 ```julia
 for i ∈ CartesianIndices(C)
@@ -68,7 +71,7 @@ for i ∈ CartesianIndices(C)
 end
 ```
 
-which is both efficient and much more readable.  Indeed, the statement
+which is not less efficient and yet much more readable.  Indeed, the statement
 
 ```julia
 for j ∈ CartesianIndices(A) ∩ (CartesianIndices(B) .+ i)
@@ -92,7 +95,7 @@ end
 Now suppose that you want to compute the **discrete convolution** instead:
 
 $$
-C[i] = \sum_{j} A[j]\,B[i-j]
+C[i] = \sum_{j} A[j] B[i-j]
 $$
 
 Then, the code for multi-dimensional arrays writes:
@@ -111,7 +114,7 @@ because you want to have `j ∈ CartesianIndices(A)` and `i - j ∈
 CartesianIndices(B)`, the latter being equivalent to `j ∈ i -
 CartesianIndices(B)`.
 
-This simple change however results in a dramatic slowdown because the
+This simple change however results in **a dramatic slowdown** because the
 expression `i .- CartesianIndices(B)` yields a vector of Cartesian indices
 while the expression `CartesianIndices(B) .- i` yields an instance of
 `CartesianIndices`.
@@ -140,7 +143,18 @@ end
 ```
 
 which do not require the broadcasting operators `.+` and `.-` and which do not
-have the aforementioned issue.
+have the aforementioned issue.  Using the macros `@range` and `@reverse_range`
+have other advantages:
+
+- The result is guaranteed to be `Int`-valued (needed for efficient indexing).
+
+- The increment in the result has a given direction: `@range` yields a positive
+  step while `@reverse_range` yields a negative step.
+
+- The syntax of range expressions is simplified and extended for other
+  operators (like `±` for stretching or `∓` for shrinking) that are not
+  available in the base Julia.  This syntax may be extended as the package is
+  developed without perturbing other packages (i.e., no type-piracy).
 
 
 ## Usage

@@ -43,6 +43,17 @@ using IndexingTools: forward, backward, ranges, to_type, to_int, stretch, shrink
         CartesianIndices((6:7, -8:-2))
     @test (@range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
         CartesianIndices((-2:-1, 6:12))
+
+    # Shift CartesianIndices by CartesianIndex (reversed).
+    @test (@reverse_range CartesianIndices((2:3, -1:5)) + CartesianIndex(4,-7)) ===
+        CartesianIndices((7:-1:6, -2:-1:-8))
+    @test (@reverse_range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
+        CartesianIndices((-1:-1:-2, 12:-1:6))
+
+    @test (@reverse_range CartesianIndex(4,-7) + CartesianIndices((2:3, -1:5))) ===
+        CartesianIndices((7:-1:6, -2:-1:-8))
+    @test (@reverse_range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
+        CartesianIndices((-1:-1:-2, 12:-1:6))
 end
 
 end # module
