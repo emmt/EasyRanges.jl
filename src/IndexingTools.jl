@@ -156,7 +156,7 @@ function plus(a::OrdinalRange{<:Integer,<:Integer}, b::Integer)
     if step_a ≥ 0
         return (first_a + int_b):(step_a):(last_a + int_b)
     else
-        return (last_a + int_b):(-step_a):(first_a - int_b)
+        return (last_a + int_b):(-step_a):(first_a + int_b)
     end
 end
 plus(a::Integer, b::OrdinalRange{<:Integer,<:Integer}) = plus(b, a)
@@ -241,7 +241,7 @@ function cap(a::AbstractUnitRange{<:Integer},
 end
 function cap(a::OrdinalRange{<:Integer,<:Integer},
              b::OrdinalRange{<:Integer,<:Integer})
-    return to_int(a ∩ b) # FIXME: Optimize?
+    return forward(a) ∩ forward(b) # FIXME: Optimize?
 end
 
 # Combine CartesianIndices and CartesianIndices or CartesianIndex.
@@ -273,7 +273,7 @@ end
 function stretch(a::OrdinalRange{<:Integer}, b::Integer)
     first_a, step_a, last_a = first_step_last(a)
     int_b = to_int(b)
-    (int_b % step_a) == 0 || error("stretch must be multiple of the step")
+    (int_b % step_a) == 0 || throw(ArgumentError("stretch must be multiple of the step"))
     if step_a ≥ 0
         return (first_a - int_b):step_a:(last_a + int_b)
     else
@@ -297,7 +297,7 @@ end
 function shrink(a::OrdinalRange{<:Integer}, b::Integer)
     first_a, step_a, last_a = first_step_last(a)
     int_b = to_int(b)
-    (int_b % step_a) == 0 || error("shrink must be multiple of the step")
+    (int_b % step_a) == 0 || throw(ArgumentError("shrink must be multiple of the step"))
     if step_a ≥ 0
         return (first_a + int_b):step_a:(last_a - int_b)
     else
