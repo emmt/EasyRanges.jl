@@ -6,6 +6,9 @@ using Base: OneTo
 using IndexingTools
 using IndexingTools: forward, backward, ranges, to_type, to_int, stretch, shrink
 
+# CartesianIndices with non-unit ranges appear in Julia 1.6
+const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
+
 @testset "IndexingTools.jl" begin
     # Check normalization of ranges.
     @test forward(OneTo(6)) === OneTo{Int}(6)
@@ -44,16 +47,31 @@ using IndexingTools: forward, backward, ranges, to_type, to_int, stretch, shrink
     @test (@range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
         CartesianIndices((-2:-1, 6:12))
 
-    # Shift CartesianIndices by CartesianIndex (reversed).
-    @test (@reverse_range CartesianIndices((2:3, -1:5)) + CartesianIndex(4,-7)) ===
-        CartesianIndices((7:-1:6, -2:-1:-8))
-    @test (@reverse_range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
-        CartesianIndices((-1:-1:-2, 12:-1:6))
+    @test (@range OneTo(5)) === OneTo(5)
+    @test (@reverse_range OneTo(5)) === 5:-1:1
 
-    @test (@reverse_range CartesianIndex(4,-7) + CartesianIndices((2:3, -1:5))) ===
-        CartesianIndices((7:-1:6, -2:-1:-8))
-    @test (@reverse_range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
-        CartesianIndices((-1:-1:-2, 12:-1:6))
+    @test (@range 1:5) === 1:5
+    @test (@reverse_range 1:5) === 5:-1:1
+    @test (@range 5:-1:1) === 1:1:5
+    @test (@reverse_range 5:-1:1) === 5:-1:1
+
+    @test (@range -7:2:6) === -7:2:5
+    @test (@reverse_range -7:2:6) === 5:-2:-7
+    @test (@range 5:-2:-8) === -7:2:5
+    @test (@reverse_range 5:-2:-8) === 5:-2:-7
+
+    # Shift CartesianIndices by CartesianIndex (reversed).
+    if CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES
+        @test (@reverse_range CartesianIndices((2:3, -1:5)) + CartesianIndex(4,-7)) ===
+            CartesianIndices((7:-1:6, -2:-1:-8))
+        @test (@reverse_range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
+            CartesianIndices((-1:-1:-2, 12:-1:6))
+
+        @test (@reverse_range CartesianIndex(4,-7) + CartesianIndices((2:3, -1:5))) ===
+            CartesianIndices((7:-1:6, -2:-1:-8))
+        @test (@reverse_range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
+            CartesianIndices((-1:-1:-2, 12:-1:6))
+    end
 end
 
 end # module
