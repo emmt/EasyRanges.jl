@@ -265,6 +265,21 @@ expression `a ± b` in [`@range`](@ref) macro.
 
 """
 stretch(a::Int, b::Int) = (a - b):(a + b)
+function stretch(a::AbstractUnitRange{<:Integer}, b::Integer)
+    first_a, last_a = first_last(a)
+    int_b = to_int(b)
+    return (first_a - int_b):(last_a + int_b)
+end
+function stretch(a::OrdinalRange{<:Integer}, b::Integer)
+    first_a, step_a, last_a = first_step_last(a)
+    int_b = to_int(b)
+    (int_b % step_a) == 0 || error("stretch must be multiple of the step")
+    if step_a ≥ 0
+        return (first_a - int_b):step_a:(last_a + int_b)
+    else
+        return (last_a - int_b):(-step_a):(first_a + int_b)
+    end
+end
 
 """
     IndexingTools.shrink(a, b)
@@ -274,6 +289,21 @@ expression `a ∓ b` in [`@range`](@ref) macro.
 
 """
 shrink(a::Int, b::Int) = (a + b):(a - b)
+function shrink(a::AbstractUnitRange{<:Integer}, b::Integer)
+    first_a, last_a = first_last(a)
+    int_b = to_int(b)
+    return (first_a + int_b):(last_a - int_b)
+end
+function shrink(a::OrdinalRange{<:Integer}, b::Integer)
+    first_a, step_a, last_a = first_step_last(a)
+    int_b = to_int(b)
+    (int_b % step_a) == 0 || error("shrink must be multiple of the step")
+    if step_a ≥ 0
+        return (first_a + int_b):step_a:(last_a - int_b)
+    else
+        return (last_a + int_b):(-step_a):(first_a - int_b)
+    end
+end
 
 for (f, s) in ((:stretch, :StretchBy),
                (:shrink, :ShrinkBy))
@@ -282,19 +312,9 @@ for (f, s) in ((:stretch, :StretchBy),
             δ::Int # left operand
         end
         (obj::$s)(x::Integer) = $f(x, obj.δ)
+        (obj::$s)(x::OrdinalRange{<:Integer,<:Integer}) = $f(x, obj.δ)
 
         $f(a::Integer, b::Integer) = $f(to_int(a), to_int(b))
-
-        $f(a::AbstractUnitRange{<:Integer}, b::Integer) =
-            $f(to_int(a), to_int(b))
-        $f(a::AbstractUnitRange{Int}, b::Int) = (first(a) - b):(last(a) + b)
-
-        $f(a::CartesianIndex{N}, b::CartesianIndex{N}) where {N} =
-            CartesianIndices(map($f, Tuple(a), Tuple(b)))
-        $f(a::CartesianIndex{N}, b::NTuple{N,Integer}) where {N} =
-            CartesianIndices(map($f, Tuple(a), b))
-        $f(a::CartesianIndex, b::Integer) =
-            CartesianIndices(map($s(b), Tuple(a)))
 
         $f(a::CartesianIndices{N}, b::CartesianIndex{N}) where {N} =
             CartesianIndices(map($f, ranges(a), Tuple(b)))
@@ -302,6 +322,17 @@ for (f, s) in ((:stretch, :StretchBy),
             CartesianIndices(map($f, ranges(a), b))
         $f(a::CartesianIndices, b::Integer) =
             CartesianIndices(map($s(b), ranges(a)))
+    end
+    # A Cartesian index can be stretched, not shrinked.
+    if f === :stretch
+        @eval begin
+            $f(a::CartesianIndex{N}, b::CartesianIndex{N}) where {N} =
+                CartesianIndices(map($f, Tuple(a), Tuple(b)))
+            $f(a::CartesianIndex{N}, b::NTuple{N,Integer}) where {N} =
+                CartesianIndices(map($f, Tuple(a), b))
+            $f(a::CartesianIndex, b::Integer) =
+            CartesianIndices(map($s(b), Tuple(a)))
+        end
     end
 end
 
