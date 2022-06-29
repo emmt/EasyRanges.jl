@@ -1,6 +1,6 @@
 module Bench
 
-using IndexingTools
+using EasyRanges
 using BenchmarkTools
 
 test1_jl(A, B, C) = A ∩ (B .+ C)

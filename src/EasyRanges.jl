@@ -1,4 +1,4 @@
-module IndexingTools
+module EasyRanges
 
 export
     @range,
@@ -7,16 +7,16 @@ export
 using Base: OneTo
 
 """
-    IndexingTools.ContiguousRange
+    EasyRanges.ContiguousRange
 
 is an alias for `AbstractUnitRange{Int}`, the type of ranges in an
-[`IndexingTools.CartesianBox`][(@ref).
+[`EasyRanges.CartesianBox`][(@ref).
 
 """
 const ContiguousRange = AbstractUnitRange{Int}
 
 """
-    IndexingTools.CartesianBox{N}
+    EasyRanges.CartesianBox{N}
 
 is an alias for `CartesianIndices{N}` but restricted to have contiguous
 Cartesian indices.  Since Julia 1.6, `CartesianIndices` may have non-unit step,
@@ -26,7 +26,7 @@ hence non-contiguous indices.
 const CartesianBox{N} = CartesianIndices{N,<:NTuple{N,ContiguousRange}}
 
 """
-    IndexingTools.StretchBy(δ) -> obj
+    EasyRanges.StretchBy(δ) -> obj
 
 yields a callable object `obj` such that `obj(x)` yields `x` stretched by
 offset `δ`.
@@ -34,7 +34,7 @@ offset `δ`.
 """ StretchBy
 
 """
-    IndexingTools.ShrinkBy(δ) -> obj
+    EasyRanges.ShrinkBy(δ) -> obj
 
 yields a callable object `obj` such that `obj(x)` yields `x` shrinked by offset
 `δ`.
@@ -50,7 +50,7 @@ forward direction (with a positive step).
 
 """
 macro range(ex::Expr)
-    esc(Expr(:call, :(IndexingTools.forward), rewrite!(ex)))
+    esc(Expr(:call, :(EasyRanges.forward), rewrite!(ex)))
 end
 
 """
@@ -62,7 +62,7 @@ reverse direction (with a negative step).
 
 """
 macro reverse_range(ex::Expr)
-    esc(Expr(:call, :(IndexingTools.backward), rewrite!(ex)))
+    esc(Expr(:call, :(EasyRanges.backward), rewrite!(ex)))
 end
 
 rewrite!(x) = x # left anything else untouched
@@ -70,15 +70,15 @@ rewrite!(x) = x # left anything else untouched
 function rewrite!(ex::Expr)
     if ex.head === :call
         if ex.args[1] === :(+)
-            ex.args[1] = :(IndexingTools.plus)
+            ex.args[1] = :(EasyRanges.plus)
         elseif ex.args[1] === :(-)
-            ex.args[1] = :(IndexingTools.minus)
+            ex.args[1] = :(EasyRanges.minus)
         elseif ex.args[1] === :(∩) || ex.args[1] === :(intersect) || ex.args[1] == :(Base.intersect)
-            ex.args[1] = :(IndexingTools.cap)
+            ex.args[1] = :(EasyRanges.cap)
         elseif ex.args[1] === :(±)
-            ex.args[1] = :(IndexingTools.stretch)
+            ex.args[1] = :(EasyRanges.stretch)
         elseif ex.args[1] === :(∓)
-            ex.args[1] = :(IndexingTools.shrink)
+            ex.args[1] = :(EasyRanges.shrink)
         end
         for i in 2:length(ex.args)
             rewrite!(ex.args[i])
@@ -88,7 +88,7 @@ function rewrite!(ex::Expr)
 end
 
 """
-    IndexingTools.forward(R)
+    EasyRanges.forward(R)
 
 yields an object which contains the same (Cartesian) indices as `R` but with
 positive step(s) and `Int`-valued.  Arguments of other types are returned
@@ -106,7 +106,7 @@ forward(a::CartesianIndices) =
     isa(a, CartesianBox) ? a : CartesianIndices(map(forward, ranges(a)))
 
 """
-    IndexingTools.backward(R)
+    EasyRanges.backward(R)
 
 yields an object which constains the same (Cartesian) indices as `R` but with
 negative step(s) and `Int`-valued.  Arguments of other types are returned
@@ -125,7 +125,7 @@ end
 backward(a::CartesianIndices) = CartesianIndices(map(backward, ranges(a)))
 
 """
-    IndexingTools.plus(a...)
+    EasyRanges.plus(a...)
 
 yields the result of expression `+a`, `a + b`, `a + b + c...` in
 [`@range`](@ref) macro.
@@ -166,7 +166,7 @@ end
 plus(a::Integer, b::OrdinalRange{<:Integer,<:Integer}) = plus(b, a)
 
 """
-    IndexingTools.minus(a...)
+    EasyRanges.minus(a...)
 
 yields the result of expression `-a` and `a - b` in [`@range`](@ref) macro.
 
@@ -225,7 +225,7 @@ function minus(a::Integer, b::OrdinalRange{<:Integer,<:Integer})
 end
 
 """
-    IndexingTools.cap(a...)
+    EasyRanges.cap(a...)
 
 yields the result of expression `a ∩ b` in [`@range`](@ref) macro.
 
@@ -267,7 +267,7 @@ cap(a::CartesianIndices{N}, b::CartesianIndices{N}) where {N} =
     CartesianIndices(map(cap, ranges(a), ranges(b)))
 
 """
-    IndexingTools.stretch(a, b)
+    EasyRanges.stretch(a, b)
 
 yields the result of stretching `a` by amount `b`.  This is equivalent to the
 expression `a ± b` in [`@range`](@ref) macro.
@@ -291,7 +291,7 @@ function stretch(a::OrdinalRange{<:Integer}, b::Integer)
 end
 
 """
-    IndexingTools.shrink(a, b)
+    EasyRanges.shrink(a, b)
 
 yields the result of shrinking `a` by amount `b`.  This is equivalent to the
 expression `a ∓ b` in [`@range`](@ref) macro.
@@ -346,7 +346,7 @@ for (f, s) in ((:stretch, :StretchBy),
 end
 
 """
-    IndexingTools.ranges(R)
+    EasyRanges.ranges(R)
 
 yields the list of ranges in Cartesian indices `R`.
 
@@ -354,7 +354,7 @@ yields the list of ranges in Cartesian indices `R`.
 ranges(R::CartesianIndices) = getfield(R, :indices)
 
 """
-    IndexingTools.first_last(x) -> (first_x, last_x)
+    EasyRanges.first_last(x) -> (first_x, last_x)
 
 yields the 2-tuple `(first(x), last(x))` converted to be `Int`-valued.
 
@@ -363,7 +363,7 @@ first_last(x::AbstractUnitRange{<:Integer}) =
     (to_int(first(x)), to_int(last(x)))
 
 """
-    IndexingTools.first_step_last(x) -> (first_x, step_x, last_x)
+    EasyRanges.first_step_last(x) -> (first_x, step_x, last_x)
 
 yields the 3-tuple `(first(x), step(x), last(x))` converted to be `Int`-valued.
 
@@ -375,7 +375,7 @@ first_step_last(x::OrdinalRange{<:Integer,<:Integer}) =
     (to_int(first(x)), to_int(step(x)), to_int(last(x)))
 
 """
-    IndexingTools.to_int(x)
+    EasyRanges.to_int(x)
 
 yields an `Int`-valued equivalent of `x`.
 
@@ -401,7 +401,7 @@ to_int(x::Tuple{Vararg{Int}}) = x
 to_int(x::Tuple{Vararg{Integer}}) = map(to_int, x)
 
 """
-    IndexingTools.to_type(T, x)
+    EasyRanges.to_type(T, x)
 
 yields `x` surely converted to type `T`.
 

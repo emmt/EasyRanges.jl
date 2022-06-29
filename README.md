@@ -1,12 +1,12 @@
-# IndexingTools
+# EasyRanges: range expressions made easier for Julia
 
-[![Build Status](https://github.com/emmt/IndexingTools.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/emmt/IndexingTools.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/emmt/IndexingTools.jl?svg=true)](https://ci.appveyor.com/project/emmt/IndexingTools-jl)
-[![Coverage](https://codecov.io/gh/emmt/IndexingTools.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/emmt/IndexingTools.jl)
+[![Build Status](https://github.com/emmt/EasyRanges.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/emmt/EasyRanges.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/emmt/EasyRanges.jl?svg=true)](https://ci.appveyor.com/project/emmt/EasyRanges-jl)
+[![Coverage](https://codecov.io/gh/emmt/EasyRanges.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/emmt/EasyRanges.jl)
 
-`IndexingTools` is a small Julia package dedicated at making life easier with,
-possibly Cartesian, indices and ranges.  This package exports macros `@range`
-and `@reverse_range` which take a single expression and rewrites it with
+`EasyRanges` is a small Julia package dedicated at making life easier with
+integer or Cartesian indices and ranges.  This package exports macros `@range`
+and `@reverse_range` which take a single expression and rewrite it with
 extended syntax rules to produce an `Int`-valued *index range* which may be a
 step range or an instance of `CartesianIndices`.  These two macros differ in
 the step sign of the result.
@@ -15,10 +15,11 @@ the step sign of the result.
 ## Usage
 
 ```julia
-using IndexingTools
+using EasyRanges
 ```
 
-exports two macros `@range` and `@reverse_range` used as:
+brings two macros, `@range` and `@reverse_range`, into scope.  These macros can
+be used as:
 
 ```julia
 @range expr
@@ -26,7 +27,7 @@ exports two macros `@range` and `@reverse_range` used as:
 ```
 
 to evaluate expression `expr` with special rules (see below) where integers,
-Cartesian indices, and ranges of integers or of Cartesian indices are threated
+Cartesian indices, and ranges of integers or of Cartesian indices are treated
 specifically:
 
 - integers are converted to `Int`, ranges to `Int`-valued ranges, and tuples of
@@ -45,7 +46,7 @@ specifically:
   of ranges with ranges, of ranges with indices, or of indices with indices;
 
 - operator `±` can be used to [*stretch*](#stretching) ranges or to produce
-  symmetric ranges;
+  centered ranges;
 
 - operator `∓` can be used to [*shrink*](#shrinking) ranges.
 
@@ -56,10 +57,9 @@ efficiency.
 
 ### Definitions
 
-In `IndexingTools`, if *indices* are integers, *ranges* means ranges of
-integers (of super-type `OrdinalRange{Int}{Int}`); if *indices* are Cartesian
-indices, *ranges* means ranges of Cartesian indices (of super-type
-`CartesianIndices`).
+In `EasyRanges`, if *indices* are integers, *ranges* means ranges of integers
+(of super-type `OrdinalRange{Int}{Int}`); if *indices* are Cartesian indices,
+*ranges* means ranges of Cartesian indices (of super-type `CartesianIndices`).
 
 
 ### Shift operations
@@ -140,7 +140,8 @@ Examples:
 ```
 
 The intersection of an index range `R` and an index `I` yields an index range
-`S` that is either empty or a singleton:
+`S` that is either the singleton `{I}` (if `I` belongs to `R`) or empty (if `I`
+does not belong to `R`):
 
 ```julia
 @range R ∩ I -> S   # S = {I} if I ∈ R, S = {} else
@@ -161,11 +162,11 @@ These syntaxes are already supported by Julia, but the `@range` macro
 guarantees to return an `Int`-valued range with a forward (positive) step.
 
 
-### Streching
+### Stretching
 
 In `@range` and `@reverse_range` expressions, the operator `±` (obtained by
 typing `\pm` and pressing the `[tab]` key at the REPL) can be used to
-**stretch** ranges or to produce symmetric ranges.
+**stretch** ranges or to produce **centered ranges**.
 
 The expression `R ± I` yields the index range `R` stretched by an amount
 specified by index `I`:
@@ -208,11 +209,11 @@ index range `R` shrink by an amount specified by index `I`:
 
 ## Installation
 
-The `IndexingTools` package can be installed as:
+The `EasyRanges` package can be installed as:
 
 ```julia
 using Pkg
-pkg"add https://github.com/emmt/IndexingTools.jl"
+pkg"add https://github.com/emmt/EasyRanges.jl"
 ```
 
 You may also consider using [my custom
@@ -222,14 +223,14 @@ registry](https://github.com/emmt/EmmtRegistry):
 using Pkg
 pkg"registry add General" # if no general registry has been installed yet
 pkg"registry add https://github.com/emmt/EmmtRegistry" # if not yet added
-pkg"add IndexingTools"
+pkg"add EasyRanges"
 ```
 
 
 ## A working example
 
-`IndexingTools` may be very useful to write readable expressions in ranges used
-by `for` loops.  For instance, suppose that you want to compute a **discrete
+`EasyRanges` may be very useful to write readable expressions in ranges used by
+`for` loops.  For instance, suppose that you want to compute a **discrete
 correlation** of `A` by `B` as follows:
 
 $$
@@ -334,8 +335,8 @@ expression `i .- CartesianIndices(B)` yields an array of Cartesian indices
 while the expression `CartesianIndices(B) .- i` yields an instance of
 `CartesianIndices`.
 
-Using the `@range` macro of `IndexingTools`, the discrete correlation and
-discrete convolution write:
+Using the `@range` macro of `EasyRanges`, the discrete correlation and discrete
+convolution write:
 
 ```julia
 # Discrete correlation.

@@ -1,10 +1,10 @@
-module TestIndexingTools
+module TestingEasyRanges
 
 using Test
 
 using Base: OneTo
-using IndexingTools
-using IndexingTools:
+using EasyRanges
+using EasyRanges:
     forward, backward, ranges, to_type, to_int, stretch, shrink,
     first_last, first_step_last, plus, minus, cap
 
@@ -15,7 +15,7 @@ Base.show(io::IO, x::CartesianIndices) =
 # CartesianIndices with non-unit ranges appear in Julia 1.6
 const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
 
-@testset "IndexingTools" begin
+@testset "EasyRanges" begin
     # to_type
     let A = [-1,0,2]
         @test to_type(Array{Int}, A) === A

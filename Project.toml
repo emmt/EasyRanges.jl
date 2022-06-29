@@ -1,5 +1,5 @@
-name = "IndexingTools"
-uuid = "83f21cc0-8014-4203-be99-7f9a344a7887"
+name = "EasyRanges"
+uuid = "bd0ea217-0861-4661-bed1-3e8ea598dd25"
 authors = ["Éric Thiébaut <eric.thiebaut@univ-lyon1.fr> and contributors"]
 version = "0.1.0"
 
