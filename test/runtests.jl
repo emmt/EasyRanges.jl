@@ -164,6 +164,9 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test (@range (2:3:14) ∩ (1:2:12)) === 5:6:11
     @test (@range (14:-3:2) ∩ (1:2:12)) === 5:6:11
 
+    @test (@range intersect(14:-3:2, 1:2:12)) === 5:6:11
+    @test (@range Base.intersect(14:-3:2, 1:2:12)) === 5:6:11
+
     # Intersection of CartesianIndices and CartesianIndex
     @test cap(CartesianIndices((2:4, 5:9)), CartesianIndex(3,5)) === CartesianIndices((3:3, 5:5))
     @test (@range CartesianIndices((2:4, 5:9)) ∩ CartesianIndex(3,5)) === CartesianIndices((3:3, 5:5))
