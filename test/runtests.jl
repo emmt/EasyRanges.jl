@@ -37,6 +37,29 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test to_int((-1,3,2)) === (-1,3,2)
     @test to_int((Int16(-1),Int16(3),Int16(2))) === (-1,3,2)
 
+    # first_last and first_step_last
+    @test first_last(Int16(-4):Int16(11)) == (-4, 11)
+    @test_throws MethodError first_last(-4:2:11)
+    @test first_step_last(Int16(-4):Int16(11)) === (-4,1,11)
+    @test first_step_last(Int16(-4):Int16(2):Int16(11)) === (-4,2,10)
+
+    # Check normalization of ranges.
+    @test forward(π) === π
+    @test forward(OneTo(6)) === OneTo{Int}(6)
+    @test forward(OneTo{Int16}(6)) === OneTo{Int}(6)
+    @test forward(2:7) === 2:7
+    @test forward(Int16(2):Int16(7)) === 2:7
+    @test forward(-2:3:11) === -2:3:11
+    @test forward(Int16(-2):Int16(3):Int16(11)) === -2:3:11
+    @test forward(11:-3:-2) === -1:3:11
+    @test forward(Int16(11):Int16(-3):Int16(-2)) === -1:3:11
+
+    # backward
+    @test backward(π) === π
+    @test backward(OneTo(5)) === 5:-1:1
+    @test backward(2:3:12) === 11:-3:2
+    @test backward(11:-3:2) === 11:-3:2
+
     # unary plus
     @test plus(1.0) === 1.0
     @test plus(7) === 7
@@ -101,6 +124,10 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test (@range CartesianIndex(-1,2) - CartesianIndices(((4:8, 2:9)))) === CartesianIndices(((-9:-5, -7:0)))
 
     # intersection
+    @test cap([1], 1) == [1]
+    @test cap(-7, -7) === -7:-7
+    @test cap(2, 0) === 1:0
+    @test cap(Int16(2), Int16(0)) === 1:0
     @test cap(2, 0:6) === 2:2
     @test cap(0:6, 2) === 2:2
     @test cap(-1, 0:6) === 1:0
@@ -117,6 +144,10 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test cap(2:3:14, 1:2:12) === 5:6:11
     @test cap(14:-3:2, 1:2:12) === 5:6:11
 
+    @test (@range [1] ∩ 1) == [1]
+    @test (@range -7 ∩ -7) === -7:-7
+    @test (@range 2 ∩ 0) === 1:0
+    @test (@range Int16(2) ∩ Int16(0)) === 1:0
     @test (@range 2 ∩ (0:6)) === 2:2
     @test (@range (0:6) ∩ 2) === 2:2
     @test (@range -1 ∩ (0:6)) === 1:0
@@ -133,24 +164,17 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test (@range (2:3:14) ∩ (1:2:12)) === 5:6:11
     @test (@range (14:-3:2) ∩ (1:2:12)) === 5:6:11
 
+    # Intersection of CartesianIndices and CartesianIndex
+    @test cap(CartesianIndices((2:4, 5:9)), CartesianIndex(3,5)) === CartesianIndices((3:3, 5:5))
+    @test (@range CartesianIndices((2:4, 5:9)) ∩ CartesianIndex(3,5)) === CartesianIndices((3:3, 5:5))
+    @test cap(CartesianIndices((2:4, 5:9)), CartesianIndex(1,5)) === CartesianIndices((1:0, 5:5))
+    @test (@range CartesianIndices((2:4, 5:9)) ∩ CartesianIndex(1,5)) === CartesianIndices((1:0, 5:5))
+    @test cap(CartesianIndices((2:4, 5:9)), CartesianIndex(2,3)) === CartesianIndices((2:2, 1:0))
+    @test (@range CartesianIndices((2:4, 5:9)) ∩ CartesianIndex(2,3)) === CartesianIndices((2:2, 1:0))
+
+    # Intersection of CartesianIndices
     @test cap(CartesianIndices((2:4, 5:9)), CartesianIndices((0:3, 6:10))) === CartesianIndices((2:3, 6:9))
     @test (@range CartesianIndices((2:4, 5:9)) ∩ CartesianIndices((0:3, 6:10))) === CartesianIndices((2:3, 6:9))
-
-    # first_last and first_step_last
-    @test first_last(Int16(-4):Int16(11)) == (-4, 11)
-    @test_throws MethodError first_last(-4:2:11)
-    @test first_step_last(Int16(-4):Int16(11)) === (-4,1,11)
-    @test first_step_last(Int16(-4):Int16(2):Int16(11)) === (-4,2,10)
-
-    # Check normalization of ranges.
-    @test forward(OneTo(6)) === OneTo{Int}(6)
-    @test forward(OneTo{Int16}(6)) === OneTo{Int}(6)
-    @test forward(2:7) === 2:7
-    @test forward(Int16(2):Int16(7)) === 2:7
-    @test forward(-2:3:11) === -2:3:11
-    @test forward(Int16(-2):Int16(3):Int16(11)) === -2:3:11
-    @test forward(11:-3:-2) === -1:3:11
-    @test forward(Int16(11):Int16(-3):Int16(-2)) === -1:3:11
 
     # Streching.
     @test stretch(7, 11) === -4:18

@@ -91,9 +91,11 @@ end
     IndexingTools.forward(R)
 
 yields an object which contains the same (Cartesian) indices as `R` but with
-positive step(s) and `Int`-valued.
+positive step(s) and `Int`-valued.  Arguments of other types are returned
+unchanged.
 
 """
+forward(a) = a
 forward(a::AbstractUnitRange{Int}) = a
 forward(a::AbstractUnitRange{<:Integer}) = to_int(a)
 function forward(a::OrdinalRange{<:Integer,<:Integer})
@@ -106,10 +108,12 @@ forward(a::CartesianIndices) =
 """
     IndexingTools.backward(R)
 
-yields an object which constains the same (Cartesian) indices as `R`
-but with negative step(s) and `Int`-valued.
+yields an object which constains the same (Cartesian) indices as `R` but with
+negative step(s) and `Int`-valued.  Arguments of other types are returned
+unchanged.
 
 """
+backward(a) = a
 function backward(a::AbstractUnitRange{<:Integer})
     first_a, last_a = first_last(a)
     return last_a:-1:first_a
@@ -226,6 +230,9 @@ end
 yields the result of expression `a ∩ b` in [`@range`](@ref) macro.
 
 """
+cap(a, b) = intersect(a, b) # use default behavior
+cap(a::Integer, b::Integer) = cap(to_int(a), to_int(b))
+cap(a::Int, b::Int) = ifelse(a === b, a:a, 1:0)
 cap(a::Integer, b::AbstractUnitRange{<:Integer}) = cap(b, a)
 function cap(a::AbstractUnitRange{<:Integer}, b::Integer)
     first_a, last_a = first_last(a)
