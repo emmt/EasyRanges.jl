@@ -250,6 +250,8 @@ function cap(a::OrdinalRange{<:Integer,<:Integer},
              b::OrdinalRange{<:Integer,<:Integer})
     return forward(a) ∩ forward(b) # FIXME: Optimize?
 end
+cap(a::CartesianIndex{N}, b::CartesianIndex{N}) where {N} =
+    CartesianIndices(map(cap, Tuple(a), Tuple(b)))
 
 # Combine CartesianIndices and CartesianIndices or CartesianIndex.
 for f in (:plus, :minus, :cap)
