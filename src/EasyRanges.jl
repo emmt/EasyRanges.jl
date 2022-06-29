@@ -362,6 +362,16 @@ yields the 2-tuple `(first(x), last(x))` converted to be `Int`-valued.
 first_last(x::AbstractUnitRange{<:Integer}) =
     (to_int(first(x)), to_int(last(x)))
 
+first_last(x::CartesianIndices) = begin
+    flag = true
+    for r in ranges(x)
+        flag &= (step(r) == 1)
+    end
+    flag || throw(ArgumentError("Cartesian ranges have non-unit step"))
+    return (CartesianIndex(map(first, ranges(x))),
+            CartesianIndex(map(last, ranges(x))))
+end
+
 """
     EasyRanges.first_step_last(x) -> (first_x, step_x, last_x)
 
@@ -373,6 +383,11 @@ first_step_last(x::AbstractUnitRange{<:Integer}) =
 
 first_step_last(x::OrdinalRange{<:Integer,<:Integer}) =
     (to_int(first(x)), to_int(step(x)), to_int(last(x)))
+
+first_step_last(x::CartesianIndices) =
+    (CartesianIndex(map(first, ranges(x))),
+     CartesianIndex(map(step, ranges(x))),
+     CartesianIndex(map(last, ranges(x))))
 
 """
     EasyRanges.to_int(x)

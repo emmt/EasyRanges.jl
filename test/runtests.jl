@@ -42,6 +42,14 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test_throws MethodError first_last(-4:2:11)
     @test first_step_last(Int16(-4):Int16(11)) === (-4,1,11)
     @test first_step_last(Int16(-4):Int16(2):Int16(11)) === (-4,2,10)
+    @test first_last(CartesianIndices((2:6, 3:5))) === (CartesianIndex(2,3), CartesianIndex(6,5))
+    @test first_step_last(CartesianIndices((2:6, 3:5))) === (CartesianIndex(2,3), CartesianIndex(1,1), CartesianIndex(6,5))
+    if CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES
+        @test first_last(CartesianIndices((2:1:6, 3:1:5))) === (CartesianIndex(2,3), CartesianIndex(6,5))
+        @test_throws ArgumentError first_last(CartesianIndices((2:1:6, 3:2:5)))
+        @test first_step_last(CartesianIndices((2:6, 3:2:7))) === (CartesianIndex(2,3), CartesianIndex(1,2), CartesianIndex(6,7))
+    end
+
 
     # Check normalization of ranges.
     @test forward(π) === π
