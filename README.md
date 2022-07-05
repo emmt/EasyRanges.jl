@@ -169,7 +169,7 @@ typing `\pm` and pressing the `[tab]` key at the REPL) can be used to
 **stretch** ranges or to produce **centered ranges**.
 
 The expression `R ± I` yields the index range `R` stretched by an amount
-specified by index `I`:
+specified by index `I`.  Assuming `R` is unit range:
 
 ```julia
 @range R ± I -> (first(R) - I):(last(R) + I)
@@ -180,8 +180,8 @@ where, if `R` is a range of integers, `I` is an integer, and if `R` is a
 shown in the above expression, the range step is preserved by the operation
 (except that the result has a positive step).
 
-The expression `I ± ΔI` with `I` an index and `ΔI` an index offset yields a
-symmetric index range:
+The expression `I ± ΔI` with `I` an index and `ΔI` an index offset yields an
+index range centered at `I`.  Assuming `R` is unit range:
 
 ```julia
 @range I ± ΔI -> (I - ΔI):(I + ΔI)
@@ -191,6 +191,8 @@ There is no sign correction and the range may be empty.  If `I` and `ΔI` are
 two integers, `I ± ΔI` is a range of integers.  If `I` is a `N`-dimensional
 Cartesian index, then `I ± ΔI` is a range of Cartesian indices and `ΔI` can be
 an integer, a `N`-tuple of integers, or a `N`-dimensional Cartesian index.
+Specifying `ΔI` as a single integer for a `N`-dimensional Cartesian index `I`
+is identical to specifying the same amount of stretching for each dimension.
 
 
 ### Shrinking
@@ -209,20 +211,11 @@ index range `R` shrink by an amount specified by index `I`:
 
 ## Installation
 
-The `EasyRanges` package can be installed as:
+The `EasyRanges` package is an official Julia package and can be installed as
+follows:
 
 ```julia
 using Pkg
-pkg"add https://github.com/emmt/EasyRanges.jl"
-```
-
-You may also consider using [my custom
-registry](https://github.com/emmt/EmmtRegistry):
-
-```julia
-using Pkg
-pkg"registry add General" # if no general registry has been installed yet
-pkg"registry add https://github.com/emmt/EmmtRegistry" # if not yet added
 pkg"add EasyRanges"
 ```
 
