@@ -5,11 +5,31 @@
 [![Coverage](https://codecov.io/gh/emmt/EasyRanges.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/emmt/EasyRanges.jl)
 
 `EasyRanges` is a small Julia package dedicated at making life easier with
-integer or Cartesian indices and ranges.  This package exports macros `@range`
-and `@reverse_range` which take a single expression and rewrite it with
-extended syntax rules to produce an `Int`-valued *index range* which may be a
-step range or an instance of `CartesianIndices`.  These two macros differ in
-the step sign of the result.
+integer or Cartesian indices and ranges. This package exports macros `@range`
+and `@reverse_range` which take an expression with extended syntax rules (see
+below) and rewrite it to produce an `Int`-valued *index range* which may be a
+step range or an instance of `CartesianIndices`. These two macros differ in the
+step sign of the result: `@range` always yield ranges with non-decreasing
+indices, while `@reverse_range` always yield ranges with non-increasing
+indices.
+
+Compared to range expressions with broadcast operators (`.+`, `.-`, etc.) that
+are implemented by Julia, the `EasyRanges` package offers a number of
+advantages:
+
+- The code is more expressive and an extended syntax is supported.
+
+- Computing the resulting range can be much faster and involves at most `O(d)`
+  storage with `d` the number of array dimensions. Note: Julia ≥ 1.9 improves
+  on this by being able to return an iterator, yet expressions such as `A ∩ (I
+  .- B)`, with `A` and `B` Cartesian ranges and `I` a Cartesian index, yield an
+  array of Cartesian indices.
+
+- The `@range` macro always yields non-decreasing indices which is most
+  favorable for the efficiency of **loop vectorization**, for example with the
+  `@simd` macro of Julia or with with the `@turbo` (formerly `@avx`) macro
+  provided by
+  [`LoopVectorization`](https://github.com/JuliaSIMD/LoopVectorization.jl.git).
 
 
 ## Usage
@@ -176,19 +196,19 @@ specified by index `I`.  Assuming `R` is unit range:
 ```
 
 where, if `R` is a range of integers, `I` is an integer, and if `R` is a
-`N`-dimensional Cartesian, `I` is a `N`-dimensional Cartesian index range.  Not
+`N`-dimensional Cartesian, `I` is a `N`-dimensional Cartesian index range. Not
 shown in the above expression, the range step is preserved by the operation
 (except that the result has a positive step).
 
 The expression `I ± ΔI` with `I` an index and `ΔI` an index offset yields an
-index range centered at `I`.  Assuming `R` is unit range:
+index range centered at `I`. Assuming `R` is unit range:
 
 ```julia
 @range I ± ΔI -> (I - ΔI):(I + ΔI)
 ```
 
-There is no sign correction and the range may be empty.  If `I` and `ΔI` are
-two integers, `I ± ΔI` is a range of integers.  If `I` is a `N`-dimensional
+There is no sign correction and the range may be empty. If `I` and `ΔI` are two
+integers, `I ± ΔI` is a range of integers. If `I` is a `N`-dimensional
 Cartesian index, then `I ± ΔI` is a range of Cartesian indices and `ΔI` can be
 an integer, a `N`-tuple of integers, or a `N`-dimensional Cartesian index.
 Specifying `ΔI` as a single integer for a `N`-dimensional Cartesian index `I`
@@ -223,14 +243,14 @@ pkg"add EasyRanges"
 ## A working example
 
 `EasyRanges` may be very useful to write readable expressions in ranges used by
-`for` loops.  For instance, suppose that you want to compute a **discrete
+`for` loops. For instance, suppose that you want to compute a **discrete
 correlation** of `A` by `B` as follows:
 
 $$
 C[i] = \sum_{j} A[j] B[j-i]
 $$
 
-and for all valid indices `i` and `j`.  Assuming `A`, `B` and `C` are abstract
+and for all valid indices `i` and `j`. Assuming `A`, `B` and `C` are abstract
 vectors, the Julia equivalent code is:
 
 ```julia
@@ -245,9 +265,9 @@ for i ∈ eachindex(C)
 end
 ```
 
-where `T` is a suitable type, say `T = promote_type(eltype(A), eltype(B))`.
-The above expressions of `j_first` and `j_last` are to ensure that `A[j]` and
-`B[j-i]` are in bounds.  The same code for multidimensional arrays writes:
+where `T` is a suitable type, say `T = promote_type(eltype(A), eltype(B))`. The
+above expressions of `j_first` and `j_last` are to ensure that `A[j]` and
+`B[j-i]` are in bounds. The same code for multidimensional arrays writes:
 
 ```julia
 for i ∈ CartesianIndices(C)
@@ -264,9 +284,9 @@ end
 ```
 
 now `i` and `j` are multidimensional Cartesian indices and Julia already helps
-a lot by making such a code applicable whatever the number of dimensions.  Note
+a lot by making such a code applicable whatever the number of dimensions. Note
 that the syntax `j_first:j_last` is supported for Cartesian indices since Julia
-1.1.  There is more such syntactic sugar and using the broadcasting operator
+1.1. There is more such syntactic sugar and using the broadcasting operator
 `.+` and the operator `∩` (a shortcut for the function `intersect`), the code
 can be rewritten as:
 
@@ -280,7 +300,7 @@ for i ∈ CartesianIndices(C)
 end
 ```
 
-which is not less efficient and yet much more readable.  Indeed, the statement
+which is not less efficient and yet much more readable. Indeed, the statement
 
 ```julia
 for j ∈ CartesianIndices(A) ∩ (CartesianIndices(B) .+ i)
@@ -288,7 +308,7 @@ for j ∈ CartesianIndices(A) ∩ (CartesianIndices(B) .+ i)
 
 makes it clear that the loop is for all indices `j` such that `j ∈
 CartesianIndices(A)` and `j - i ∈ CartesianIndices(B)` which is required to
-have `A[j]` and `B[j-i]` in bounds.   The same principles can be applied to the
+have `A[j]` and `B[j-i]` in bounds. The same principles can be applied to the
 uni-dimensional code:
 
 ```julia
@@ -335,7 +355,7 @@ convolution write:
 # Discrete correlation.
 for i ∈ CartesianIndices(C)
     s = zero(T)
-    for j ∈ @range CartesianIndices(A) ∩ (CartesianIndices(B) + i)
+    for j ∈ @range CartesianIndices(A) ∩ (i + CartesianIndices(B))
         s += A[j]*B[j-i]
     end
     C[i] = s
@@ -352,16 +372,17 @@ end
 ```
 
 which do not require the broadcasting operators `.+` and `.-` and which do not
-have the aforementioned issue.  Using the macros `@range` and `@reverse_range`
+have the aforementioned issue. Using the macros `@range` and `@reverse_range`
 have other advantages:
 
 - The result is guaranteed to be `Int`-valued (needed for efficient indexing).
 
 - The *step*, that is the increment between consecutive indices, in the result
-  has a given direction: `@range` yields a positive step while `@reverse_range`
-  yields a negative step.
+  has a given direction: `@range` always yields a non-negative step (which is
+  favorable for loop vectorization), while `@reverse_range` always yields a
+  non-positive step.
 
 - The syntax of range expressions is simplified and extended for other
   operators (like `±` for stretching or `∓` for shrinking) that are not
-  available in the base Julia.  This syntax can be extended as the package is
+  available in the base Julia. This syntax can be extended as the package is
   developed without disturbing other packages (i.e., no type-piracy).
