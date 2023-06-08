@@ -346,7 +346,13 @@ CartesianIndices(B)`.
 This simple change however results in **a dramatic slowdown** because the
 expression `i .- CartesianIndices(B)` yields an array of Cartesian indices
 while the expression `CartesianIndices(B) .- i` yields an instance of
-`CartesianIndices`.
+`CartesianIndices`. As an example, the discrete convolution of a 32×32 array by
+a 8×8 array in single precision floating-point takes 30.3 ms or 88.5 ms on my
+laptop (Intel Core i7-5500U CPU at 2.40GHz) depending on the order of the
+operands and 40Mb of memory compared to 5.6 μs or 35.8 µs and no additional
+memory for a discrete correlation (all with `@inbounds` and `@simd` of course).
+Hence a slowdown by a factor of 5410 or 2570 for the same number of
+floating-point operations.
 
 Using the `@range` macro of `EasyRanges`, the discrete correlation and discrete
 convolution write:
