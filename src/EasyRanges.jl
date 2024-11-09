@@ -7,25 +7,6 @@ export
 using Base: OneTo
 
 """
-    EasyRanges.ContiguousRange
-
-is an alias for `AbstractUnitRange{Int}`, the type of ranges in an
-[`EasyRanges.CartesianBox`][(@ref).
-
-"""
-const ContiguousRange = AbstractUnitRange{Int}
-
-"""
-    EasyRanges.CartesianBox{N}
-
-is an alias for `CartesianIndices{N}` but restricted to have contiguous
-Cartesian indices.  Since Julia 1.6, `CartesianIndices` may have non-unit step,
-hence non-contiguous indices.
-
-"""
-const CartesianBox{N} = CartesianIndices{N,<:NTuple{N,ContiguousRange}}
-
-"""
     EasyRanges.StretchBy(δ) -> obj
 
 yields a callable object `obj` such that `obj(x)` yields `x` stretched by
@@ -102,8 +83,8 @@ function forward(a::OrdinalRange{<:Integer,<:Integer})
     first_a, step_a, last_a = first_step_last(a)
     return step_a ≥ 0 ? (first_a:step_a:last_a) : (last_a:-step_a:first_a)
 end
-forward(a::CartesianIndices) =
-    isa(a, CartesianBox) ? a : CartesianIndices(map(forward, ranges(a)))
+forward(R::CartesianIndices{N,<:NTuple{N,AbstractUnitRange{Int}}}) where {N} = R
+forward(R::CartesianIndices) = CartesianIndices(map(forward, ranges(R)))
 
 """
     EasyRanges.backward(R)
