@@ -9,25 +9,23 @@ using Base: OneTo
 """
     EasyRanges.StretchBy(δ) -> obj
 
-yields a callable object `obj` such that `obj(x)` yields `x` stretched by
-offset `δ`.
+yields a callable object `obj` such that `obj(x)` yields `x` stretched by offset `δ`.
 
 """ StretchBy
 
 """
     EasyRanges.ShrinkBy(δ) -> obj
 
-yields a callable object `obj` such that `obj(x)` yields `x` shrinked by offset
-`δ`.
+yields a callable object `obj` such that `obj(x)` yields `x` shrinked by offset `δ`.
 
 """ ShrinkBy
 
 """
     @range expr
 
-rewrites range expression `expr` with extended syntax.  The result is an
-`Int`-valued index range (possibly Cartesian) where indices are running in the
-forward direction (with a positive step).
+rewrites range expression `expr` with extended syntax. The result is an `Int`-valued index
+range (possibly Cartesian) where indices are running in the forward direction (with a
+positive step).
 
 """
 macro range(ex::Expr)
@@ -37,9 +35,9 @@ end
 """
     @reverse_range expr
 
-rewrites range expression `expr` with extended syntax.  The result is an
-`Int`-valued index range (possibly Cartesian) where indices are running in the
-reverse direction (with a negative step).
+rewrites range expression `expr` with extended syntax. The result is an `Int`-valued index
+range (possibly Cartesian) where indices are running in the reverse direction (with a
+negative step).
 
 """
 macro reverse_range(ex::Expr)
@@ -71,9 +69,8 @@ end
 """
     EasyRanges.forward(R)
 
-yields an object which contains the same (Cartesian) indices as `R` but with
-positive step(s) and `Int`-valued.  Arguments of other types are returned
-unchanged.
+yields an object which contains the same (Cartesian) indices as `R` but with positive
+step(s) and `Int`-valued. Arguments of other types are returned unchanged.
 
 """
 forward(a) = a
@@ -89,9 +86,8 @@ forward(R::CartesianIndices) = CartesianIndices(map(forward, ranges(R)))
 """
     EasyRanges.backward(R)
 
-yields an object which constains the same (Cartesian) indices as `R` but with
-negative step(s) and `Int`-valued.  Arguments of other types are returned
-unchanged.
+yields an object which constains the same (Cartesian) indices as `R` but with negative
+step(s) and `Int`-valued. Arguments of other types are returned unchanged.
 
 """
 backward(a) = a
@@ -108,8 +104,7 @@ backward(a::CartesianIndices) = CartesianIndices(map(backward, ranges(a)))
 """
     EasyRanges.plus(a...)
 
-yields the result of expression `+a`, `a + b`, `a + b + c...` in
-[`@range`](@ref) macro.
+yields the result of expression `+a`, `a + b`, `a + b + c...` in [`@range`](@ref) macro.
 
 """ plus
 
@@ -250,8 +245,8 @@ cap(a::CartesianIndices{N}, b::CartesianIndices{N}) where {N} =
 """
     EasyRanges.stretch(a, b)
 
-yields the result of stretching `a` by amount `b`.  This is equivalent to the
-expression `a ± b` in [`@range`](@ref) macro.
+yields the result of stretching `a` by amount `b`. This is equivalent to the expression `a
+± b` in [`@range`](@ref) macro.
 
 """
 stretch(a::Int, b::Int) = (a - b):(a + b)
@@ -274,8 +269,8 @@ end
 """
     EasyRanges.shrink(a, b)
 
-yields the result of shrinking `a` by amount `b`.  This is equivalent to the
-expression `a ∓ b` in [`@range`](@ref) macro.
+yields the result of shrinking `a` by amount `b`. This is equivalent to the expression `a
+∓ b` in [`@range`](@ref) macro.
 
 """
 shrink(a::Int, b::Int) = (a + b):(a - b)
