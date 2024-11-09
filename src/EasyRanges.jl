@@ -7,20 +7,6 @@ export
 using Base: OneTo
 
 """
-    EasyRanges.StretchBy(δ) -> obj
-
-yields a callable object `obj` such that `obj(x)` yields `x` stretched by offset `δ`.
-
-""" StretchBy
-
-"""
-    EasyRanges.ShrinkBy(δ) -> obj
-
-yields a callable object `obj` such that `obj(x)` yields `x` shrinked by offset `δ`.
-
-""" ShrinkBy
-
-"""
     @range expr
 
 rewrites range expression `expr` with extended syntax. The result is an `Int`-valued index
@@ -290,15 +276,8 @@ function shrink(a::OrdinalRange{<:Integer}, b::Integer)
     end
 end
 
-for (f, s) in ((:stretch, :StretchBy),
-               (:shrink, :ShrinkBy))
+for f in (:stretch, :shrink)
     @eval begin
-        struct $s <: Function
-            δ::Int # left operand
-        end
-        (obj::$s)(x::Integer) = $f(x, obj.δ)
-        (obj::$s)(x::OrdinalRange{<:Integer,<:Integer}) = $f(x, obj.δ)
-
         $f(a::Integer, b::Integer) = $f(to_int(a), to_int(b))
 
         $f(a::CartesianIndices{N}, b::CartesianIndex{N}) where {N} =
@@ -306,7 +285,7 @@ for (f, s) in ((:stretch, :StretchBy),
         $f(a::CartesianIndices{N}, b::NTuple{N,Integer}) where {N} =
             CartesianIndices(map($f, ranges(a), b))
         $f(a::CartesianIndices, b::Integer) =
-            CartesianIndices(map($s(b), ranges(a)))
+            CartesianIndices(map(Base.Fix2($f, b), ranges(a)))
     end
     # A Cartesian index can be stretched, not shrinked.
     if f === :stretch
@@ -316,7 +295,7 @@ for (f, s) in ((:stretch, :StretchBy),
             $f(a::CartesianIndex{N}, b::NTuple{N,Integer}) where {N} =
                 CartesianIndices(map($f, Tuple(a), b))
             $f(a::CartesianIndex, b::Integer) =
-            CartesianIndices(map($s(b), Tuple(a)))
+                CartesianIndices(map(Base.Fix2($f, b), Tuple(a)))
         end
     end
 end
