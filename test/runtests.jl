@@ -5,7 +5,7 @@ using Test
 using Base: OneTo
 using EasyRanges
 using EasyRanges:
-    forward, backward, ranges, to_type, to_int, stretch, shrink,
+    forward, backward, ranges, normalize, to_type, stretch, shrink,
     first_last, first_step_last, plus, minus, cap
 
 # A bit of type-piracy for more readable error messages.
@@ -23,19 +23,19 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
         @test to_type(Array{Int16}, A) == A
     end
 
-    # to_int
-    @test to_int(5) === 5
-    @test to_int(UInt16(7)) === 7
-    @test to_int(OneTo{Int}(8)) === OneTo(8)
-    @test to_int(OneTo{UInt16}(3)) === OneTo(3)
-    @test to_int(3:8) === 3:8
-    @test to_int(UInt16(3):UInt16(8)) === 3:8
-    @test to_int(8:-3:-1) === 8:-3:-1
-    @test to_int(Int16(8):Int16(-3):Int16(-1)) === 8:-3:-1
-    @test to_int(CartesianIndex(-1,2,3,4)) === CartesianIndex(-1,2,3,4)
-    @test to_int(CartesianIndices((Int16(-1):Int16(3),Int16(2):Int16(8)))) === CartesianIndices((-1:3,2:8))
-    @test to_int((-1,3,2)) === (-1,3,2)
-    @test to_int((Int16(-1),Int16(3),Int16(2))) === (-1,3,2)
+    # Test `normalize`.
+    @test normalize(5) === 5
+    @test normalize(UInt16(7)) === 7
+    @test normalize(OneTo{Int}(8)) === OneTo(8)
+    @test normalize(OneTo{UInt16}(3)) === OneTo(3)
+    @test normalize(3:8) === 3:8
+    @test normalize(UInt16(3):UInt16(8)) === 3:8
+    @test normalize(8:-3:-1) === 8:-3:-1
+    @test normalize(Int16(8):Int16(-3):Int16(-1)) === 8:-3:-1
+    @test normalize(CartesianIndex(-1,2,3,4)) === CartesianIndex(-1,2,3,4)
+    @test normalize(CartesianIndices((Int16(-1):Int16(3),Int16(2):Int16(8)))) === CartesianIndices((-1:3,2:8))
+    @test normalize((-1,3,2)) === (-1,3,2)
+    @test normalize((Int16(-1),Int16(3),Int16(2))) === (-1,3,2)
 
     # first_last and first_step_last
     @test first_last(Int16(-4):Int16(11)) == (-4, 11)

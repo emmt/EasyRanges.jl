@@ -28,3 +28,6 @@ end user.
   consists in calling `EasyRange.forward` or `EasyRange.backward` which take care of the
   sign of the step. This also fixes bugs in the stretching and shrinking (`±` and `∓`)
   operators.
+
+- Internal method `EasyRange.to_int` has been suppressed. It is superseded by
+  `EasyRange.normalize`.

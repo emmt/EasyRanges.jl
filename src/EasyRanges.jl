@@ -321,32 +321,6 @@ first_step_last(x::CartesianIndices) =
      CartesianIndex(map(last, ranges(x))))
 
 """
-    EasyRanges.to_int(x)
-
-yields an `Int`-valued equivalent of `x`.
-
-"""
-to_int(x::Int) = x
-to_int(x::Integer) = to_type(Int, x)
-
-to_int(x::OneTo{Int}) = x
-to_int(x::OneTo) = OneTo{Int}(x.stop)
-
-to_int(x::AbstractUnitRange{Int}) = x
-to_int(x::AbstractUnitRange{<:Integer}) = to_int(first(x)):to_int(last(x))
-
-to_int(x::OrdinalRange{Int,Int}) = x
-to_int(x::OrdinalRange{<:Integer}) =
-    to_int(first(x)):to_int(step(x)):to_int(last(x))
-
-# Cartesian indices are already `Int`-valued.
-to_int(x::CartesianIndex) = x
-to_int(x::CartesianIndices) = x
-
-to_int(x::Tuple{Vararg{Int}}) = x
-to_int(x::Tuple{Vararg{Integer}}) = map(to_int, x)
-
-"""
     EasyRanges.to_type(T, x)
 
 yields `x` surely converted to type `T`.
