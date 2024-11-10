@@ -116,8 +116,8 @@ The `@reverse_macro` yields ranges with negative steps:
 ```julia
 @reverse_range (3:6) + 1 ->  7:-1:4
 @reverse_range 1 + (3:6) ->  7:-1:4
-@reverse_range (3:6) - 1 ->  5:-1:1
-@reverse_range 1 - (3:6) -> -1:-1:-5
+@reverse_range (3:6) - 1 ->  5:-1:2
+@reverse_range 1 - (3:6) -> -2:-1:-5
 ```
 
 Cartesian ranges can be shifted by a Cartesian index (without penalties on the execution
@@ -174,7 +174,7 @@ Examples:
 @range (2:6) ∩ 3     -> 3:3 # a singleton range
 @range 1 ∩ (2:6)     -> 1:0 # an empty range
 @range (2:6) ∩ (3:7) -> 3:6 # intersection of ranges
-@range CartesianIndices((2:4, 5:9)) ∩ CartesianIndex(3,7))
+@range CartesianIndices((2:4, 5:9)) ∩ CartesianIndex(3,7)
     -> CartesianIndices((3:3, 7:7))
 ```
 
@@ -232,9 +232,9 @@ range `R` shrink by an amount specified by index `I`:
 
 To extend the `@range` and `@reverse_range` macros to foreign types that may represent
 indices or ranges of indices, it is sufficient to specialize the
-`EasyRanges.normalize(x::T)` method for specific type `T` so that it returns an object
-which represents the same (Cartesian) index or set of indices as `x` but in one of the
-following forms:
+`EasyRanges.normalize(x::T)` method for the type `T` so that it returns an object which
+represents the same (Cartesian) index or set of indices as `x` but in one of the following
+canonic forms:
 
 - an integer `i::Int` if `x` is equivalent to a single linear index;
 
