@@ -74,7 +74,7 @@ indices, and ranges of integers or of Cartesian indices are treated specifically
 
 - operator `∓` can be used to [*shrink*](#shrinking) ranges;
 
-- the syntax `\$(subexpr)` may be used to prevent any sub-expression `subexpr` of `expr`
+- the syntax `$(subexpr)` may be used to prevent any sub-expression `subexpr` of `expr`
   from being interpreted as a range expression, i.e. with the above rules.
 
 As shown in [*A working example*](#a-working-example) below, these rules are useful for
@@ -84,8 +84,8 @@ writing readable ranges in `for` loops without sacrificing efficiency.
 ### Definitions
 
 In `EasyRanges`, if *indices* are integers, *ranges* means ranges of integers (of
-super-type `OrdinalRange{Int}{Int}`); if *indices* are Cartesian indices, *ranges* means
-ranges of Cartesian indices (of super-type `CartesianIndices`).
+super-type `OrdinalRange{Int}`); if *indices* are Cartesian indices, *ranges* means ranges
+of Cartesian indices (of super-type `CartesianIndices`).
 
 
 ### Shift operations
