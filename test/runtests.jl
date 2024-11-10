@@ -5,7 +5,7 @@ using Test
 using Base: OneTo
 using EasyRanges
 using EasyRanges:
-    forward, backward, ranges, normalize, to_type, stretch, shrink,
+    forward, backward, ranges, normalize, stretch, shrink,
     first_last, first_step_last, plus, minus, cap
 
 # A bit of type-piracy for more readable error messages.
@@ -16,13 +16,6 @@ Base.show(io::IO, x::CartesianIndices) =
 const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
 
 @testset "EasyRanges" begin
-    # to_type
-    let A = [-1,0,2]
-        @test to_type(Array{Int}, A) === A
-        @test to_type(Array{Int16}, A) isa Array{Int16}
-        @test to_type(Array{Int16}, A) == A
-    end
-
     # Test `normalize`.
     @test normalize(5) === 5
     @test normalize(UInt16(7)) === 7

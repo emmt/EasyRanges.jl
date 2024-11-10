@@ -320,13 +320,4 @@ first_step_last(x::CartesianIndices) =
      CartesianIndex(map(step, ranges(x))),
      CartesianIndex(map(last, ranges(x))))
 
-"""
-    EasyRanges.to_type(T, x)
-
-yields `x` surely converted to type `T`.
-
-"""
-to_type(::Type{T}, x::T) where {T} = x
-to_type(::Type{T}, x) where {T} = convert(T, x)::T
-
 end

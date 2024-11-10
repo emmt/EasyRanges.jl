@@ -17,7 +17,7 @@ Breaking changes:
   confusion.
 
 The following changes only concern internal methods and types, they should not affect the
-end user.
+end user:
 
 - Private aliases `EasyRanges.ContiguousRange` and `EasyRanges.CartesianBox{N}` have been
   suppressed.
@@ -29,5 +29,8 @@ end user.
   sign of the step. This also fixes bugs in the stretching and shrinking (`±` and `∓`)
   operators.
 
-- Internal method `EasyRange.to_int` has been suppressed. It is superseded by
+- Unused internal method `EasyRange.to_int` has been suppressed. It is superseded by
   `EasyRange.normalize`.
+
+- Unused internal method `EasyRange.to_type` has been suppressed. It is superseded by
+  `TypeUtils.as` and, to some extend, by `EasyRange.normalize`.
