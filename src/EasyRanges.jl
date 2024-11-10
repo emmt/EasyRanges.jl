@@ -61,7 +61,7 @@ end
 """
     EasyRanges.normalize(x)
 
-yields an object which represent the same (Cartesian) index or set of indices as `x` but
+yields an object which represents the same (Cartesian) index or set of indices as `x` but
 in one of the following forms:
 
 - an integer `i::Int` if `x` is equivalent to a single linear index;

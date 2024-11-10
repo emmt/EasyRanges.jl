@@ -27,6 +27,17 @@ implemented by Julia, the `EasyRanges` package offers a number of advantages:
   with with the `@turbo` (formerly `@avx`) macro provided by
   [`LoopVectorization`](https://github.com/JuliaSIMD/LoopVectorization.jl.git).
 
+Table of contents:
+
+- [Usage](#usage)
+  - [Definitions](#definitions)
+  - [Shift operations](#shift-operations)
+  - [Intersecting](#intersecting)
+  - [Stretching](#stretching)
+  - [Shrinking](#shrinking)
+- [Extension to other types](#extension-to-other-types)
+- [A working example](#a-working-example)
+- [Installation](#installation)
 
 ## Usage
 
@@ -217,14 +228,27 @@ range `R` shrink by an amount specified by index `I`:
 ```
 
 
-## Installation
+## Extension to other types
 
-The `EasyRanges` package is an official Julia package and can be installed as follows:
+To extend the `@range` and `@reverse_range` macros to foreign types that may represent
+indices or ranges of indices, it is sufficient to specialize the
+`EasyRanges.normalize(x::T)` method for specific type `T` so that it returns an object
+which represents the same (Cartesian) index or set of indices as `x` but in one of the
+following forms:
 
-```julia
-using Pkg
-pkg"add EasyRanges"
-```
+- an integer `i::Int` if `x` is equivalent to a single linear index;
+
+- a range of integers `r::AbstractRange{Int}` if `x` is equivalent to a range of linear
+  indices;
+
+- a multi-dimensional Cartesian index `I::CartesianIndex{N}` if `x` is equivalent to a
+  single `N`-dimensional Cartesian index;
+
+- a multi-dimensional Cartesian range `R::CartesianIndices{N}` if `x` is equivalent to a
+  rectangular region of `N`-dimensional Cartesian indices.
+
+This is all what is needed to have the `@range` and `@reverse_range` macros handle indices
+or index ranges of type `T`.
 
 
 ## A working example
@@ -374,3 +398,13 @@ advantages:
   for stretching or `∓` for shrinking) that are not available in the base Julia. This
   syntax can be extended as the package is developed without disturbing other packages
   (i.e., no type-piracy).
+
+
+## Installation
+
+The `EasyRanges` package is an official Julia package and can be installed as follows:
+
+```julia
+using Pkg
+pkg"add EasyRanges"
+```
