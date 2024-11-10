@@ -1,5 +1,7 @@
 # User visible changes in `EasyRanges`
 
+## Version 0.1.3
+
 New features:
 
 - The method `EasyRanges.normalize` is not exported but may be extended by other packages
