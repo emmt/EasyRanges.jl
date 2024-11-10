@@ -7,7 +7,7 @@ New features:
 - The method `EasyRanges.normalize` is not exported but may be extended by other packages
   to implement their own index or index range objects in `EasyRanges`.
 
-- In the `@range` or `@reverse_range` expression, the synyax `\$(subexpr)` may be used to
+- In the `@range` or `@reverse_range` expression, the syntax `$(subexpr)` may be used to
   prevent any sub-expression `subexpr` from being interpreted as a range expression.
 
 Breaking changes:
@@ -17,12 +17,12 @@ Breaking changes:
   ranges of indices. All such arguments are filtered by the `EasyRanges.normalize` method
   which shall return an equivalent object in a canonical form. If `EasyRanges.normalize`
   is not implemented for a given type, it is considered that the object is invalid as an
-  index or as an index range. There was no such restriction in the previous version and
+  index or as an index range. There were no such restrictions in the previous version and
   expressions involving non-index objects could possibly work but this was a source of
-  confusion.
+  confusion. Now the syntax `$(subexpr)` should be used to protect sub-expressions from
+  being interpreted as a range expression.
 
-The following changes only concern internal methods and types, they should not affect the
-end user:
+The following changes only concern internal methods and types, they should not affect the end user:
 
 - Private aliases `EasyRanges.ContiguousRange` and `EasyRanges.CartesianBox{N}` have been
   suppressed.
@@ -38,7 +38,8 @@ end user:
   superseded by `EasyRange.normalize`.
 
 - Internal method `EasyRange.to_type` is no longer used and has been suppressed. It is
-  superseded by `TypeUtils.as` and, to some extend, by `EasyRange.normalize`.
+  superseded by [`TypeUtils.as`](https://github.com/emmt/TypeUtils.jl) and, to some
+  extend, by `EasyRange.normalize`.
 
 - Internal methods `EasyRange.first_last` and `EasyRange.first_step_last` are no longer
   used and have been suppressed.
