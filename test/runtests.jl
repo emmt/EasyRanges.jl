@@ -5,14 +5,12 @@ using Test
 using Base: OneTo
 using EasyRanges
 using EasyRanges:
+    ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES,
     forward, backward, ranges, normalize, stretch, shrink, plus, minus, cap
 
 # A bit of type-piracy for more readable error messages.
 Base.show(io::IO, x::CartesianIndices) =
     print(io, "CartesianIndices($(x.indices))")
-
-# CartesianIndices with non-unit ranges appear in Julia 1.6
-const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
 
 @testset "EasyRanges" begin
     # Test `normalize`.
@@ -44,7 +42,10 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test forward(11:-3:-2) === -1:3:11
     @test forward(Int16(11):Int16(-3):Int16(-2)) === -1:3:11
     @test forward(CartesianIndex(-1,3,4)) === CartesianIndex(-1,3,4)
-    @test forward(CartesianIndices((Int16(0):Int16(3),Int16(8):Int16(-3):Int16(1)))) === CartesianIndices((0:3, 2:3:8))
+    @test forward(CartesianIndices((Int16(0):Int16(3),Int16(2):Int16(8)))) === CartesianIndices((0:3, 2:8))
+    if !ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES
+        @test forward(CartesianIndices((Int16(0):Int16(3),Int16(8):Int16(-3):Int16(1)))) === CartesianIndices((0:3, 2:3:8))
+    end
 
     # Test `backward`.
     @test_throws Exception backward(π) === π
@@ -54,7 +55,9 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test backward(2:3:12) === 11:-3:2
     @test backward(11:-3:2) === 11:-3:2
     @test backward(CartesianIndex(-1,3,4)) === CartesianIndex(-1,3,4)
-    @test backward(CartesianIndices((Int16(0):Int16(3),Int16(8):Int16(-3):Int16(1)))) === CartesianIndices((3:-1:0, 8:-3:2))
+    if !ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES
+        @test backward(CartesianIndices((Int16(0):Int16(3),Int16(8):Int16(-3):Int16(1)))) === CartesianIndices((3:-1:0, 8:-3:2))
+    end
 
     # Unary plus.
     @test_throws Exception plus(1.0) === 1.0
@@ -67,7 +70,7 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test plus(12:-4:-1) === 12:-4:0
     @test plus(CartesianIndex(-1,2,3,4)) === CartesianIndex(-1,2,3,4)
     @test plus(CartesianIndices((4:8,2:9))) === CartesianIndices((4:8,2:9))
-    if CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES
+    if !ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES
         @test plus(CartesianIndices((8:-1:4,2:3:9))) === CartesianIndices((8:-1:4,2:3:8))
     end
 
@@ -101,7 +104,7 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test minus(12:-4:-1) === -12:4:0
     @test minus(CartesianIndex(-1,2,3,4)) === CartesianIndex(1,-2,-3,-4)
     @test minus(CartesianIndices((4:8,2:9))) === CartesianIndices((-8:-4,-9:-2))
-    if CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES
+    if !ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES
         @test minus(CartesianIndices((8:-1:3,2:3:9))) === CartesianIndices((-8:1:-3,-2:-3:-8))
     end
 
@@ -258,7 +261,7 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test (@reverse_range 5:-2:-8) === 5:-2:-7
 
     # Shift CartesianIndices by CartesianIndex (reversed).
-    if CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES
+    if !ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES
         @test (@reverse_range CartesianIndices((2:3, -1:5)) + CartesianIndex(4,-7)) ===
             CartesianIndices((7:-1:6, -2:-1:-8))
         @test (@reverse_range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===

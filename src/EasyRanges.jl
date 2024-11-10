@@ -6,6 +6,10 @@ export
 
 using Base: OneTo
 
+# Since Julia 1.6, `CartesianIndices` may have non-unit steps. Before Julia 1.6,
+# `CartesianIndices` can only have unit-ranges.
+const ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES = !applicable(CartesianIndices, (0:2:4,))
+
 """
     @range expr
 
@@ -124,8 +128,12 @@ _forward(r::AbstractRange{Int}) = begin
     s = _step(r)
     return s ≥ zero(s) ? (a : s : b) : (b : -s : a)
 end
-_forward(R::CartesianIndices{N,<:NTuple{N,AbstractUnitRange{Int}}}) where {N} = R
-_forward(R::CartesianIndices) = CartesianIndices(map(forward, ranges(R)))
+if ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES
+    _forward(R::CartesianIndices) = R
+else
+    _forward(R::CartesianIndices) = CartesianIndices(map(forward, ranges(R)))
+    _forward(R::CartesianIndices{N,<:NTuple{N,AbstractUnitRange{Int}}}) where {N} = R
+end
 
 """
     EasyRanges.backward(x)
