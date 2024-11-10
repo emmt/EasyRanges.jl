@@ -89,8 +89,7 @@ normalize(x::Base.OneTo{<:Integer}) = Base.OneTo{Int}(x)
 normalize(x::AbstractUnitRange{Int}) = x
 normalize(x::AbstractUnitRange{<:Integer}) = AbstractUnitRange{Int}(x)
 normalize(x::AbstractRange{Int}) = x
-normalize(x::AbstractRange{<:Integer}) =
-    normalize(first(x)) : normalize(step(x)) : normalize(last(x))
+normalize(x::AbstractRange{<:Integer}) = _first(x) : _step(x) : _last(x)
 normalize(x::CartesianIndex) = x
 normalize(x::CartesianIndices) = x
 @noinline normalize() = error("missing argument in `normalize(x)`")
@@ -98,10 +97,11 @@ normalize(x::CartesianIndices) = x
     error("unexpected object of type `$(typeof(x))` in `@range` expression, you may specialize `EasyRanges.normalize` for that type")
 
 """
-    EasyRanges.forward(R)
+    EasyRanges.forward(x)
 
-yields an object which contains the same (Cartesian) indices as `R` but with positive
-step(s) and `Int`-valued. Arguments of other types are returned unchanged.
+yields an object which represents the same index or set of indices as `x` but with
+positive step(s) and `Int`-valued indices. Call [`EasyRanges.backward(x)](@ref
+`EasyRanges.backward) to ensure negative step(s).
 
 """
 forward(x) = _forward(normalize(x))
@@ -109,32 +109,33 @@ forward(x) = _forward(normalize(x))
 _forward(i::Int) = i
 _forward(I::CartesianIndex) = I
 _forward(r::AbstractUnitRange{Int}) = r
-_forward(r::OrdinalRange{Int,Int}) = begin
-    first_r, step_r, last_r = first_step_last(r)
-    return step_r ≥ zero(step_r) ?
-        (first_r : step_r : last_r) :
-        (last_r : -step_r : first_r)
+_forward(r::AbstractRange{Int}) = begin
+    a = _first(r)
+    b = _last(r)
+    s = _step(r)
+    return s ≥ zero(s) ? (a : s : b) : (b : -s : a)
 end
 _forward(R::CartesianIndices{N,<:NTuple{N,AbstractUnitRange{Int}}}) where {N} = R
 _forward(R::CartesianIndices) = CartesianIndices(map(forward, ranges(R)))
 
 """
-    EasyRanges.backward(R)
+    EasyRanges.backward(x)
 
-yields an object which constains the same (Cartesian) indices as `R` but with negative
-step(s) and `Int`-valued. Arguments of other types are returned unchanged.
+yields an object which represents the same index or set of indices as `x` but with
+negative step(s) and `Int`-valued indices. Call [`EasyRanges.forward(x)](@ref
+`EasyRanges.forward) to ensure positive step(s).
 
 """
 backward(x) = _backward(normalize(x))
 
 _backward(i::Int) = i
 _backward(I::CartesianIndex) = I
-_backward(r::AbstractUnitRange{Int}) = last(r) : -1 : first(r)
-_backward(r::OrdinalRange{Int,Int}) = begin
-    first_r, step_r, last_r = first_step_last(r)
-    return step_r ≤ zero(step_r) ?
-        (first_r : step_r : last_r) :
-        (last_r : -step_r : first_r)
+_backward(r::AbstractUnitRange{Int}) = _last(r) : -1 : _first(r)
+_backward(r::AbstractRange{Int}) = begin
+    a = _first(r)
+    b = _last(r)
+    s = _step(r)
+    return s ≤ zero(s) ? (a : s : b) : (b : -s : a)
 end
 _backward(R::CartesianIndices) = CartesianIndices(map(backward, ranges(R)))
 
@@ -156,8 +157,8 @@ plus(x, y) = _plus(normalize(x), normalize(y))
 
 _plus(x::Int, y::Int) = x + y
 _plus(i::Int, r::AbstractRange{Int}) = _plus(r, i)
-_plus(r::AbstractUnitRange{Int}, i::Int) = first(r) + i : last(r) + i
-_plus(r::OrdinalRange{Int}, i::Int) = first(r) + i : step(r) : last(r) + i
+_plus(r::AbstractUnitRange{Int}, i::Int) = _first(r) + i : _last(r) + i
+_plus(r::AbstractRange{Int}, i::Int) = _first(r) + i : _step(r) : _last(r) + i
 
 # Addition of 3 or more arguments.
 @inline plus(x, y, z...) = plus(plus(x, y), z...) # FIXME: _plus(normalize(x), plus(y, z...))
@@ -174,8 +175,8 @@ yield the result of expressions `-x` or `x - y` in [`@range`](@ref) macro.
 minus(x) = _minus(normalize(x))
 
 _minus(i::Int) = -i
-_minus(r::AbstractUnitRange{Int}) = -last(r) : -first(r)
-_minus(r::OrdinalRange{Int,Int}) = -first(r) : -step(r) : -last(r)
+_minus(r::AbstractUnitRange{Int}) = -_last(r) : -_first(r)
+_minus(r::AbstractRange{Int}) = -_first(r) : -_step(r) : -_last(r)
 _minus(I::CartesianIndex) = -I
 _minus(R::CartesianIndices) = CartesianIndices(map(_minus, ranges(R)))
 
@@ -183,10 +184,10 @@ _minus(R::CartesianIndices) = CartesianIndices(map(_minus, ranges(R)))
 minus(x, y) = _minus(normalize(x), normalize(y))
 
 _minus(x::Int, y::Int) = x - y
-_minus(r::AbstractUnitRange{Int}, i::Int) = first(r) - i : last(r) - i
-_minus(i::Int, r::AbstractUnitRange{Int}) = i - last(r) : i - first(r)
-_minus(r::OrdinalRange{Int,Int}, i::Int) = first(r) - i : step(r) : last(r) - i
-_minus(i::Int, r::OrdinalRange{Int,Int}) = i - first(r) : -step(r) : i - last(r)
+_minus(r::AbstractUnitRange{Int}, i::Int) = _first(r) - i : _last(r) - i
+_minus(i::Int, r::AbstractUnitRange{Int}) = i - _last(r) : i - _first(r)
+_minus(r::AbstractRange{Int}, i::Int) = _first(r) - i : _step(r) : _last(r) - i
+_minus(i::Int, r::AbstractRange{Int}) = i - _first(r) : -_step(r) : i - _last(r)
 
 """
     EasyRanges.cap(a, b)
@@ -198,12 +199,12 @@ cap(a, b) = _cap(normalize(a), normalize(b))
 
 _cap(a::Int, b::Int) = ifelse(a == b, a:a, 1:0)
 _cap(i::Int, r::AbstractRange{Int}) = _cap(r, i)
-_cap(r::AbstractUnitRange{Int}, i::Int) = ifelse((first(r) ≤ i)&(i ≤ last(r)), i:i, 1:0)
+_cap(r::AbstractUnitRange{Int}, i::Int) = ifelse((_first(r) ≤ i)&(i ≤ _last(r)), i:i, 1:0)
 _cap(r::AbstractRange{Int}, i::Int) = ifelse(i ∈ r, i:i, 1:0)
 _cap(a::OneTo{Int}, b::OneTo{Int}) = OneTo{Int}(min(a.stop, b.stop))
 _cap(a::AbstractUnitRange{Int}, b::AbstractUnitRange{Int}) =
-    max(first(a), first(b)) : min(last(a), last(b))
-_cap(a::OrdinalRange{Int,Int}, b::OrdinalRange{Int,Int}) =
+    max(_first(a), _first(b)) : min(_last(a), _last(b))
+_cap(a::AbstractRange{Int}, b::AbstractRange{Int}) =
     _forward(a) ∩ _forward(b) # FIXME: Optimize?
 _cap(a::CartesianIndex{N}, b::CartesianIndex{N}) where {N} =
     CartesianIndices(map(_cap, Tuple(a), Tuple(b)))
@@ -230,11 +231,11 @@ yields the result of stretching `a` by amount `b`. This is equivalent to the exp
 stretch(a, b) = _stretch(normalize(a), normalize(b))
 
 _stretch(a::Int, b::Int) = a - b : a + b
-_stretch(r::AbstractUnitRange{Int}, i::Int) = first(r) - i : last(r) + i
-_stretch(r::OrdinalRange{Int,Int}, i::Int) = begin
-    s = step(r)
+_stretch(r::AbstractUnitRange{Int}, i::Int) = _first(r) - i : _last(r) + i
+_stretch(r::AbstractRange{Int}, i::Int) = begin
+    s = _step(r)
     iszero(i % s) || throw(ArgumentError("stretch must be multiple of the step"))
-    return first(r) - i : s : last(r) + i
+    return _first(r) - i : s : _last(r) + i
 end
 
 """
@@ -247,11 +248,11 @@ yields the result of shrinking `a` by amount `b`. This is equivalent to the expr
 shrink(a, b) = _shrink(normalize(a), normalize(b))
 
 _shrink(a::Int, b::Int) = a + b : a - b
-_shrink(r::AbstractUnitRange{Int}, i::Int) = first(r) + i : last(r) - i
-_shrink(r::OrdinalRange{Int,Int}, i::Int) = begin
-    s = step(r)
+_shrink(r::AbstractUnitRange{Int}, i::Int) = _first(r) + i : _last(r) - i
+_shrink(r::AbstractRange{Int}, i::Int) = begin
+    s = _step(r)
     iszero(i % s) || throw(ArgumentError("shrink must be multiple of the step"))
-    return first(r) + i : s : last(r) - i
+    return _first(r) + i : s : _last(r) - i
 end
 
 for f in (:_stretch, :_shrink)
@@ -276,6 +277,11 @@ for f in (:_stretch, :_shrink)
     end
 end
 
+# These versions ensure that and `Int` is returned.
+_first(r::AbstractRange{<:Integer}) = normalize(first(r))
+_last(r::AbstractRange{<:Integer}) = normalize(last(r))
+_step(r::AbstractRange{<:Integer}) = normalize(step(r))
+
 """
     EasyRanges.ranges(R)
 
@@ -283,41 +289,5 @@ yields the list of ranges in Cartesian indices `R`.
 
 """
 ranges(R::CartesianIndices) = getfield(R, :indices)
-
-"""
-    EasyRanges.first_last(x) -> (first_x, last_x)
-
-yields the 2-tuple `(first(x), last(x))` converted to be `Int`-valued.
-
-"""
-first_last(x::AbstractUnitRange{<:Integer}) =
-    (normalize(first(x)), normalize(last(x)))
-
-first_last(x::CartesianIndices) = begin
-    flag = true
-    for r in ranges(x)
-        flag &= (step(r) == 1)
-    end
-    flag || throw(ArgumentError("Cartesian ranges have non-unit step"))
-    return (CartesianIndex(map(first, ranges(x))),
-            CartesianIndex(map(last, ranges(x))))
-end
-
-"""
-    EasyRanges.first_step_last(x) -> (first_x, step_x, last_x)
-
-yields the 3-tuple `(first(x), step(x), last(x))` converted to be `Int`-valued.
-
-"""
-first_step_last(x::AbstractUnitRange{<:Integer}) =
-    (normalize(first(x)), 1, normalize(last(x)))
-
-first_step_last(x::OrdinalRange{<:Integer,<:Integer}) =
-    (normalize(first(x)), normalize(step(x)), normalize(last(x)))
-
-first_step_last(x::CartesianIndices) =
-    (CartesianIndex(map(first, ranges(x))),
-     CartesianIndex(map(step, ranges(x))),
-     CartesianIndex(map(last, ranges(x))))
 
 end

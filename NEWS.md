@@ -29,8 +29,11 @@ end user:
   sign of the step. This also fixes bugs in the stretching and shrinking (`±` and `∓`)
   operators.
 
-- Unused internal method `EasyRange.to_int` has been suppressed. It is superseded by
-  `EasyRange.normalize`.
+- Internal method `EasyRange.to_int` is no longer used and has been suppressed. It is
+  superseded by `EasyRange.normalize`.
 
-- Unused internal method `EasyRange.to_type` has been suppressed. It is superseded by
-  `TypeUtils.as` and, to some extend, by `EasyRange.normalize`.
+- Internal method `EasyRange.to_type` is no longer used and has been suppressed. It is
+  superseded by `TypeUtils.as` and, to some extend, by `EasyRange.normalize`.
+
+- Internal methods `EasyRange.first_last` and `EasyRange.first_step_last` are no longer
+  used and have been suppressed.

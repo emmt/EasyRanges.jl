@@ -6,7 +6,7 @@ using Base: OneTo
 using EasyRanges
 using EasyRanges:
     forward, backward, ranges, normalize, stretch, shrink,
-    first_last, first_step_last, plus, minus, cap
+    plus, minus, cap
 
 # A bit of type-piracy for more readable error messages.
 Base.show(io::IO, x::CartesianIndices) =
@@ -17,6 +17,8 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
 
 @testset "EasyRanges" begin
     # Test `normalize`.
+    @test_throws Exception normalize()
+    @test_throws Exception normalize("hello")
     @test normalize(5) === 5
     @test normalize(UInt16(7)) === 7
     @test normalize(OneTo{Int}(8)) === OneTo(8)
@@ -29,19 +31,6 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test normalize(CartesianIndices((Int16(-1):Int16(3),Int16(2):Int16(8)))) === CartesianIndices((-1:3,2:8))
     @test normalize((-1,3,2)) === (-1,3,2)
     @test normalize((Int16(-1),Int16(3),Int16(2))) === (-1,3,2)
-
-    # first_last and first_step_last
-    @test first_last(Int16(-4):Int16(11)) == (-4, 11)
-    @test_throws MethodError first_last(-4:2:11)
-    @test first_step_last(Int16(-4):Int16(11)) === (-4,1,11)
-    @test first_step_last(Int16(-4):Int16(2):Int16(11)) === (-4,2,10)
-    @test first_last(CartesianIndices((2:6, 3:5))) === (CartesianIndex(2,3), CartesianIndex(6,5))
-    @test first_step_last(CartesianIndices((2:6, 3:5))) === (CartesianIndex(2,3), CartesianIndex(1,1), CartesianIndex(6,5))
-    if CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES
-        @test first_last(CartesianIndices((2:1:6, 3:1:5))) === (CartesianIndex(2,3), CartesianIndex(6,5))
-        @test_throws ArgumentError first_last(CartesianIndices((2:1:6, 3:2:5)))
-        @test first_step_last(CartesianIndices((2:6, 3:2:7))) === (CartesianIndex(2,3), CartesianIndex(1,2), CartesianIndex(6,7))
-    end
 
     # Check normalization of ranges.
     @test_throws Exception forward(π) === π
