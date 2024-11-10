@@ -72,7 +72,10 @@ indices, and ranges of integers or of Cartesian indices are treated specifically
 - operator `±` can be used to [*stretch*](#stretching) ranges or to produce centered
   ranges;
 
-- operator `∓` can be used to [*shrink*](#shrinking) ranges.
+- operator `∓` can be used to [*shrink*](#shrinking) ranges;
+
+- the syntax `\$(subexpr)` may be used to prevent any sub-expression `subexpr` of `expr`
+  from being interpreted as a range expression, i.e. with the above rules.
 
 As shown in [*A working example*](#a-working-example) below, these rules are useful for
 writing readable ranges in `for` loops without sacrificing efficiency.

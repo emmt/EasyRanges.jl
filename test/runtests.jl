@@ -269,6 +269,13 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
         @test (@reverse_range CartesianIndices((2:3, -1:5)) - CartesianIndex(4,-7)) ===
             CartesianIndices((-1:-1:-2, 12:-1:6))
     end
+
+    # Escaping range rules.
+    @test_throws Exception (@range round(Int16, 4.1 + 0.5):Int16(-1):Int16(0))
+    @test (@range $(round(Int16, 4.1 + 0.5)):Int16(-1):Int16(0)) === 0:1:5
+    @test_throws Exception (@reverse_range round(Int16, 4.1 + 0.5):Int16(-1):Int16(0))
+    @test (@reverse_range $(round(Int16, 4.1 + 0.5)):Int16(-1):Int16(0)) === 5:-1:0
+
 end
 
 end # module

@@ -5,6 +5,9 @@ New features:
 - The method `EasyRanges.normalize` is not exported but may be extended by other packages
   to implement their own index or index range objects in `EasyRanges`.
 
+- In the `@range` or `@reverse_range` expression, the synyax `\$(subexpr)` may be used to
+  prevent any sub-expression `subexpr` from being interpreted as a range expression.
+
 Breaking changes:
 
 - Expressions in `@range` and `@reverse_range` should only involve array indices (linear

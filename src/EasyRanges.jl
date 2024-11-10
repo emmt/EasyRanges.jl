@@ -13,6 +13,10 @@ rewrites range expression `expr` with extended syntax. The result is an `Int`-va
 range (possibly Cartesian) where indices are running in the forward direction (with a
 positive step). Call [`@reverse_range`](@ref) if a negative step is required.
 
+Operations (`+`, `-`, `∩`, etc.) in `expr` shall only involve indices or index ranges. The
+syntax `\$(subexpr)` may be used to protect any sub-expression `subexpr` of `expr` from
+being interpreted as a range expression.
+
 See [`EasyRanges.normalize`](@ref) to implement non-standard index or range types in the
 `@range` and [`@reverse_range`](@ref) macros.
 
@@ -26,7 +30,8 @@ end
 
 rewrites range expression `expr` with extended syntax. The result is an `Int`-valued index
 range (possibly Cartesian) where indices are running in the reverse direction (with a
-negative step). Call [`@range`](@ref) if a positive step is required.
+negative step). Call [`@range`](@ref) if a positive step is required and see the
+documentation of this macro for more explanations.
 
 See [`EasyRanges.normalize`](@ref) to implement non-standard index or range types in the
 [`@range`](@ref) and `@reverse_range` macros.
@@ -54,6 +59,10 @@ function rewrite!(ex::Expr)
         for i in 2:length(ex.args)
             rewrite!(ex.args[i])
         end
+    elseif ex.head === :($) && length(ex.args) == 1
+        # Replace `$(expr)` by `identity(expr)`.
+        ex.head = :call
+        push!(ex.args, :(Base.identity), pop!(ex.args))
     end
     return ex
 end
@@ -94,7 +103,7 @@ normalize(x::CartesianIndex) = x
 normalize(x::CartesianIndices) = x
 @noinline normalize() = error("missing argument in `normalize(x)`")
 @noinline normalize(@nospecialize(x)) =
-    error("unexpected object of type `$(typeof(x))` in `@range` expression, you may specialize `EasyRanges.normalize` for that type")
+    error("Unexpected object of type `$(typeof(x))` in argument of `@range` or `@reverse_range`. Possible solutions: (i) fix the range expression, (ii) use `\$(expr)` to prevent sub-expression `expr` from being interpreted as a range expression, or (iii) specialize `EasyRanges.normalize` for type `$(typeof(x))`")
 
 """
     EasyRanges.forward(x)
