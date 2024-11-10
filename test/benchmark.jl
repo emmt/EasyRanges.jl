@@ -15,7 +15,6 @@ test1(A, B, C) = @range A ∩ (B + C)
 test2_jl(A, B, C) = A ∩ (B .- C)
 test2(A, B, C) = @range A ∩ (B - C)
 
-
 # Discrete correlation.
 function correlate_jl!(dst, A, B)
     T = promote_type(eltype(A), eltype(B))

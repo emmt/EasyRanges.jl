@@ -5,8 +5,7 @@ using Test
 using Base: OneTo
 using EasyRanges
 using EasyRanges:
-    forward, backward, ranges, normalize, stretch, shrink,
-    plus, minus, cap
+    forward, backward, ranges, normalize, stretch, shrink, plus, minus, cap
 
 # A bit of type-piracy for more readable error messages.
 Base.show(io::IO, x::CartesianIndices) =
@@ -32,8 +31,10 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test normalize((-1,3,2)) === (-1,3,2)
     @test normalize((Int16(-1),Int16(3),Int16(2))) === (-1,3,2)
 
-    # Check normalization of ranges.
+    # Test `forward`.
     @test_throws Exception forward(π) === π
+    @test forward(-5) === -5
+    @test forward(0x5) === 5
     @test forward(OneTo(6)) === OneTo{Int}(6)
     @test forward(OneTo{Int16}(6)) === OneTo{Int}(6)
     @test forward(2:7) === 2:7
@@ -42,14 +43,20 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test forward(Int16(-2):Int16(3):Int16(11)) === -2:3:11
     @test forward(11:-3:-2) === -1:3:11
     @test forward(Int16(11):Int16(-3):Int16(-2)) === -1:3:11
+    @test forward(CartesianIndex(-1,3,4)) === CartesianIndex(-1,3,4)
+    @test forward(CartesianIndices((Int16(0):Int16(3),Int16(8):Int16(-3):Int16(1)))) === CartesianIndices((0:3, 2:3:8))
 
-    # backward
+    # Test `backward`.
     @test_throws Exception backward(π) === π
+    @test backward(-5) === -5
+    @test backward(0x5) === 5
     @test backward(OneTo(5)) === 5:-1:1
     @test backward(2:3:12) === 11:-3:2
     @test backward(11:-3:2) === 11:-3:2
+    @test backward(CartesianIndex(-1,3,4)) === CartesianIndex(-1,3,4)
+    @test backward(CartesianIndices((Int16(0):Int16(3),Int16(8):Int16(-3):Int16(1)))) === CartesianIndices((3:-1:0, 8:-3:2))
 
-    # unary plus
+    # Unary plus.
     @test_throws Exception plus(1.0) === 1.0
     @test plus(7) === 7
     @test plus(Int16(7)) === 7
@@ -64,7 +71,7 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
         @test plus(CartesianIndices((8:-1:4,2:3:9))) === CartesianIndices((8:-1:4,2:3:8))
     end
 
-    # binary plus
+    # Addition.
     @test_throws Exception plus(2, π) === (2 + π)
     @test plus(3, 8) === 11
     @test plus(Int16(3), Int16(8)) === 11
@@ -79,10 +86,11 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test plus(CartesianIndex(-1,2), CartesianIndices(((4:8, 2:9)))) === CartesianIndices(((3:7, 4:11)))
     @test (@range CartesianIndex(-1,2) + CartesianIndices(((4:8, 2:9)))) === CartesianIndices(((3:7, 4:11)))
 
-    # plus with more arguments
+    # Addition of 3 or more arguments
     @test_throws Exception plus(1.0, 2, π, sqrt(2)) === (1.0 + 2 + π + sqrt(2))
+    @test plus(1, 2:3, 4) === 7:8 == 1 .+ (2:3) .+ 4
 
-    # unary minus
+    # Unary minus.
     @test_throws Exception minus(1.0) === -1.0
     @test minus(7) === -7
     @test minus(Int16(7)) === -7
@@ -97,7 +105,7 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
         @test minus(CartesianIndices((8:-1:3,2:3:9))) === CartesianIndices((-8:1:-3,-2:-3:-8))
     end
 
-    # binary minus
+    # Subtraction.
     @test_throws Exception minus(2, π) === (2 - π)
     @test minus(3, 8) === -5
     @test minus(Int16(3), Int16(8)) === -5
@@ -112,7 +120,7 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test minus(CartesianIndex(-1,2), CartesianIndices(((4:8, 2:9)))) === CartesianIndices(((-9:-5, -7:0)))
     @test (@range CartesianIndex(-1,2) - CartesianIndices(((4:8, 2:9)))) === CartesianIndices(((-9:-5, -7:0)))
 
-    # intersection
+    # Intersection.
     @test_throws Exception cap([1], 1) == [1]
     @test cap(-7, -7) === -7:-7
     @test cap(2, 0) === 1:0
@@ -129,6 +137,8 @@ const CARTESIAN_INDICES_MAY_HAVE_NON_UNIT_RANGES = (VERSION ≥ v"1.6")
     @test cap(0:5, 1:7) === 1:5
     @test cap(1:7, 2:8) === 2:7
     @test cap(2:8, 1:7) === 2:7
+    @test cap(2:3:9, 11) === 1:0
+    @test cap(2:3:9, 5) === 5:5
     @test cap(2:3:9, 1:1:7) === 2:3:5
     @test cap(2:3:14, 1:2:12) === 5:6:11
     @test cap(14:-3:2, 1:2:12) === 5:6:11
