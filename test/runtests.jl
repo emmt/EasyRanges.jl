@@ -273,6 +273,11 @@ Base.show(io::IO, x::CartesianIndices) =
             CartesianIndices((-1:-1:-2, 12:-1:6))
     end
 
+    # Applying macros on a simpler argument than an expression.
+    r = -2:5
+    @test (@range r) === -2:5
+    @test (@reverse_range r) === 5:-1:-2
+
     # Escaping range rules.
     @test_throws Exception (@range round(Int16, 4.1 + 0.5):Int16(-1):Int16(0))
     @test (@range $(round(Int16, 4.1 + 0.5)):Int16(-1):Int16(0)) === 0:1:5

@@ -25,7 +25,7 @@ See [`EasyRanges.normalize`](@ref) to implement non-standard index or range type
 `@range` and [`@reverse_range`](@ref) macros.
 
 """
-macro range(ex::Expr)
+macro range(ex)
     esc(Expr(:call, :(EasyRanges.forward), rewrite!(ex)))
 end
 
@@ -41,7 +41,7 @@ See [`EasyRanges.normalize`](@ref) to implement non-standard index or range type
 [`@range`](@ref) and `@reverse_range` macros.
 
 """
-macro reverse_range(ex::Expr)
+macro reverse_range(ex)
     esc(Expr(:call, :(EasyRanges.backward), rewrite!(ex)))
 end
 

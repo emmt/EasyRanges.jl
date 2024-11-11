@@ -1,5 +1,9 @@
 # User visible changes in `EasyRanges`
 
+- Macros `@range` and `@reverse_range` can take a more simple argument than an expression.
+  For example, `@range r` or `@reverse_range r` with `r` an index or an index range.
+
+
 ## Version 0.1.3
 
 New features:
