@@ -1,5 +1,8 @@
 # User visible changes in `EasyRanges`
 
+- Macro `@public` is used to declare as *public* (a new concept introduced in Julia 1.11)
+  non-exported public symbols.
+
 - Macros `@range` and `@reverse_range` can take a more simple argument than an expression.
   For example, `@range r` or `@reverse_range r` with `r` an index or an index range.
 

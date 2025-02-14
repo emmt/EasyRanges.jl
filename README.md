@@ -224,7 +224,7 @@ In `@range` and `@reverse_range` expressions, the operator `∓` (obtained by ty
 and pressing the `[tab]` key at the REPL) can be used to **shrink** ranges.
 
 The expression `R ∓ I` yields the same result as `@range R ± (-I)`, that is the index
-range `R` shrink by an amount specified by index `I`:
+range `R` shrunk by an amount specified by index `I`:
 
 ```julia
 @range R ∓ I -> (first(R) + I):(last(R) - I)
@@ -234,10 +234,10 @@ range `R` shrink by an amount specified by index `I`:
 ## Extension to other types
 
 To extend the `@range` and `@reverse_range` macros to foreign types that may represent
-indices or ranges of indices, it is sufficient to specialize the
+indices or ranges of indices, it may be sufficient to specialize the
 `EasyRanges.normalize(x::T)` method for the type `T` so that it returns an object which
 represents the same (Cartesian) index or set of indices as `x` but in one of the following
-canonic forms:
+canonical forms:
 
 - an integer `i::Int` if `x` is equivalent to a single linear index;
 
@@ -252,6 +252,21 @@ canonic forms:
 
 This is all what is needed to have the `@range` and `@reverse_range` macros handle indices
 or index ranges of type `T`.
+
+The following methods can also be specialized in the types of their arguments to make
+`EasyRanges` aware of types provided by foreign packages:
+
+- `EasyRanges.plus(x)` and `EasyRanges.plus(x, y)` implement `+x` and `x + y` in
+  `EasyRanges` expressions;
+
+- `EasyRanges.minus(x)` and `EasyRanges.minus(x, y)` implement `-x` and `x - y` in
+  `EasyRanges` expressions;
+
+- `EasyRanges.cap(a, b)` implements `a ∩ b` in `EasyRanges` expressions;
+
+- `EasyRanges.stretch(a, b)` implements `a ± b` in `EasyRanges` expressions;
+
+- `EasyRanges.shrink(a, b)` implements `a ∓ b` in `EasyRanges` expressions;
 
 
 ## A working example
