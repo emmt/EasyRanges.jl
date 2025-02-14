@@ -4,3 +4,4 @@
 *~
 /runtests
 /Manifest.toml
+/.Manifest-*.toml
