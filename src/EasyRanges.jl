@@ -183,6 +183,9 @@ _backward(R::CartesianIndices) = CartesianIndices(map(backward, ranges(R)))
 yield the result of expressions `+x`, `x + y`, or `x + y + z...` in [`@range`](@ref)
 macro.
 
+Foreign packages may extend `EasyRanges.plus(x)` and `EasyRanges.plus(x, y)` for
+specific types of `x` and `y`.
+
 """ plus
 @public backward
 
@@ -205,6 +208,9 @@ _plus(r::AbstractRange{Int}, i::Int) = _first(r) + i : _step(r) : _last(r) + i
     EasyRanges.minus(x, y)
 
 yield the result of expressions `-x` or `x - y` in [`@range`](@ref) macro.
+
+Foreign packages may extend `EasyRanges.minus(x)` and `EasyRanges.minus(x, y)` for
+specific types of `x` and `y`.
 
 """ minus
 @public minus
@@ -231,6 +237,8 @@ _minus(i::Int, r::AbstractRange{Int}) = i - _first(r) : -_step(r) : i - _last(r)
     EasyRanges.cap(a, b)
 
 yields the result of expression `a ∩ b` in [`@range`](@ref) macro.
+
+Foreign packages may extend `EasyRanges.cap(a, b)` for specific types of `a` and `b`.
 
 """
 cap(a, b) = _cap(normalize(a), normalize(b))
@@ -266,6 +274,8 @@ end
 yields the result of stretching `a` by amount `b`. This is equivalent to the expression `a
 ± b` in [`@range`](@ref) macro.
 
+Foreign packages may extend `EasyRanges.stretch(a, b)` for specific types of `a` and `b`.
+
 """
 stretch(a, b) = _stretch(normalize(a), normalize(b))
 @public stretch
@@ -283,6 +293,8 @@ end
 
 yields the result of shrinking `a` by amount `b`. This is equivalent to the expression `a
 ∓ b` in [`@range`](@ref) macro.
+
+Foreign packages may extend `EasyRanges.shrink(a, b)` for specific types of `a` and `b`.
 
 """
 shrink(a, b) = _shrink(normalize(a), normalize(b))
@@ -327,6 +339,8 @@ _step(r::AbstractRange{<:Integer}) = normalize(step(r))
     EasyRanges.ranges(R)
 
 yields the list of ranges in Cartesian indices `R`.
+
+Foreign packages may extend `EasyRanges.ranges(R)` for specific types of `R`.
 
 """
 ranges(R::CartesianIndices) = getfield(R, :indices)
