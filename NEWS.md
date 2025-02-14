@@ -1,5 +1,7 @@
 # User visible changes in `EasyRanges`
 
+## Version 0.1.4
+
 - Macro `@public` is used to declare as *public* (a new concept introduced in Julia 1.11)
   non-exported public symbols.
 
