@@ -6,6 +6,22 @@ export
 
 using Base: OneTo
 
+"""
+    @public args...
+
+declares `args...` as being `public` even though they are not exported. For Julia version
+< 1.11, this macro does nothing. Using this macro also avoid errors with CI and coverage
+tools.
+
+"""
+macro public(args::Union{Symbol,Expr}...)
+    if VERSION ≥ v"1.11.0-DEV.469"
+        esc(Expr(:public, args...))
+    else
+        nothing
+    end
+end
+
 # Since Julia 1.6, `CartesianIndices` may have non-unit steps. Before Julia 1.6,
 # `CartesianIndices` can only have unit-ranges.
 const ONLY_UNIT_RANGES_IN_CARTESIAN_INDICES = !applicable(CartesianIndices, (0:2:4,))
@@ -92,7 +108,8 @@ This method may be extended by foreign packages to let `EasyRanges` known how to
 other types of indices or of set of indices provided they are equivalent to one of the
 above canonical forms.
 
-"""
+""" normalize
+@public normalize
 normalize(x::Int) = x
 normalize(x::Integer) = Int(x)
 normalize(x::Tuple{Vararg{Int}}) = x
@@ -118,6 +135,7 @@ positive step(s) and `Int`-valued indices. Call [`EasyRanges.backward(x)](@ref
 
 """
 forward(x) = _forward(normalize(x))
+@public forward
 
 _forward(i::Int) = i
 _forward(I::CartesianIndex) = I
@@ -144,6 +162,7 @@ negative step(s) and `Int`-valued indices. Call [`EasyRanges.forward(x)](@ref
 
 """
 backward(x) = _backward(normalize(x))
+@public backward
 
 _backward(i::Int) = i
 _backward(I::CartesianIndex) = I
@@ -165,6 +184,7 @@ yield the result of expressions `+x`, `x + y`, or `x + y + z...` in [`@range`](@
 macro.
 
 """ plus
+@public backward
 
 # Unary plus just call `normalize`.
 plus(x) = normalize(x)
@@ -187,6 +207,7 @@ _plus(r::AbstractRange{Int}, i::Int) = _first(r) + i : _step(r) : _last(r) + i
 yield the result of expressions `-x` or `x - y` in [`@range`](@ref) macro.
 
 """ minus
+@public minus
 
 # Unary minus.
 minus(x) = _minus(normalize(x))
@@ -213,6 +234,7 @@ yields the result of expression `a ∩ b` in [`@range`](@ref) macro.
 
 """
 cap(a, b) = _cap(normalize(a), normalize(b))
+@public cap
 
 _cap(a::Int, b::Int) = ifelse(a == b, a:a, 1:0)
 _cap(i::Int, r::AbstractRange{Int}) = _cap(r, i)
@@ -246,6 +268,7 @@ yields the result of stretching `a` by amount `b`. This is equivalent to the exp
 
 """
 stretch(a, b) = _stretch(normalize(a), normalize(b))
+@public stretch
 
 _stretch(a::Int, b::Int) = a - b : a + b
 _stretch(r::AbstractUnitRange{Int}, i::Int) = _first(r) - i : _last(r) + i
@@ -263,6 +286,7 @@ yields the result of shrinking `a` by amount `b`. This is equivalent to the expr
 
 """
 shrink(a, b) = _shrink(normalize(a), normalize(b))
+@public shrink
 
 _shrink(a::Int, b::Int) = a + b : a - b
 _shrink(r::AbstractUnitRange{Int}, i::Int) = _first(r) + i : _last(r) - i
@@ -306,5 +330,6 @@ yields the list of ranges in Cartesian indices `R`.
 
 """
 ranges(R::CartesianIndices) = getfield(R, :indices)
+@public ranges
 
 end
