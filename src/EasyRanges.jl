@@ -200,8 +200,8 @@ _plus(i::Int, r::AbstractRange{Int}) = _plus(r, i)
 _plus(r::AbstractUnitRange{Int}, i::Int) = _first(r) + i : _last(r) + i
 _plus(r::AbstractRange{Int}, i::Int) = _first(r) + i : _step(r) : _last(r) + i
 
-# Addition of 3 or more arguments.
-@inline plus(x, y, z...) = plus(plus(x, y), z...) # FIXME: _plus(normalize(x), plus(y, z...))
+# Addition of 3 or more arguments recursively calls the 2-argument version.
+@inline plus(x, y, z...) = plus(plus(x, y), z...)
 
 """
     EasyRanges.minus(x)
@@ -330,7 +330,7 @@ for f in (:_stretch, :_shrink)
     end
 end
 
-# These versions ensure that and `Int` is returned.
+# These versions ensure that an `Int` is returned.
 _first(r::AbstractRange{<:Integer}) = normalize(first(r))
 _last(r::AbstractRange{<:Integer}) = normalize(last(r))
 _step(r::AbstractRange{<:Integer}) = normalize(step(r))
